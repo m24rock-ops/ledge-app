@@ -1,86 +1,227 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Ledge - PG or(room) Finder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="ledge.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LedGe – Find Your PG</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="ledge.css"/>
 </head>
 <body>
-  <div class="container">
-    <!-- LOGIN SECTION -->
-    <div id="loginSection" class="card">
-      <h1>🏠 Ledge - PG or (Room) Finder</h1>
-      <label>Your Name</label>
-      <input type="text" id="userName" placeholder="Enter your name">
-      <label>Phone Number</label>
-      <input type="tel" id="userPhone" placeholder="Enter your phone">
-      <button  type ="radio"id="loginBtn">Get Started</button>
+
+  <!-- LOADER -->
+  <div id="loader">
+    <div class="logo-text"><span style="color:#f7f2fb">Led-Ge</span></div>
+    <div class="logo-text"><i class="arrow right"></i></div>
+    <div class="dot-row">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
     </div>
+  </div>
 
-    <!-- MAIN APP (hidden initially) -->
-    <div id="mainApp" style="display:none;">
-      <div class="card">
-        <h1>Welcome, <span id="displayName"></span>!</h1>
-        <button id="browsBtn">Browse PGs or Rooms</button>
-        <button id="addBtn" style="margin-top:12px;">List Your PG or Room</button>
-        <button id="logoutBtn" style="margin-top:12px;background:#dc2626;">Logout</button>
-      </div>
+  <!-- Toast Notification -->
+  <div id="toast"></div>
 
-      <!-- BROWSE PGs -->
-      <div id="browseSection" style="display:none;">
-        <div class="card">
-          <label>Filter Property</label>
-          <select id="filterType">
-            <option value="all">All</option>
-            <option value="PG">PG</option>
-            <option value="Room">Room</option>
-          </select>
-          <h2>Available properties</h2>
-          <div id="pgList">Loading...</div>
-        </div>
-      </div>
-
-      <!-- ADD PG FORM -->
-      <div id="addSection" style="display:none;">
-        <div class="card">
-          <h2>List Your PG</h2>
-
-          <label>Property Type</label>
-          <select id="propertyType">
-            <option value="">Select</option>
-            <option value="PG">PG</option>
-            <option value="Room">Room</option>
-          </select>
-
-          <label>PG Name</label>
-          <input type="text" id="pgName" placeholder="e.g. Sunrise PG">
-
-          <label>Monthly Rent (₹)</label>
-          <input type="number" id="pgPrice" placeholder="e.g. 6000" step="500">
-
-          <label>Location</label>
-          <input type="text" id="pgLocation" placeholder="e.g. Koramangala, Bengaluru">
-
-          <label>Room Type</label>
-          <select id="pgType">
-            <option value="">Select</option>
-            <option value="1 Sharing">1 Sharing</option>
-            <option value="2 Sharing">2 Sharing</option>
-            <option value="3 Sharing">3 Sharing</option>
-          </select>
-
-          <label>Contact Number</label>
-          <input type="tel" id="pgContact" placeholder="Your phone number">
-
-          <label>Property Photo</label>
-          <input type="file" id="pgImage" accept="image/*">
-
-          <button id="submitBtn">List Your PG</button>
-          <button id="backBtn" style="margin-top:12px;background:#6b7280;">Back</button>
-        </div>
+  <!-- DELETE CONFIRM MODAL -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <h3>Delete Listing?</h3>
+      <p>This will permanently remove your PG listing. This action cannot be undone.</p>
+      <div class="modal-btns">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
       </div>
     </div>
   </div>
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="nav-brand">Led<span>Ge</span></div>
+    <div class="nav-right" id="navRight" style="display:none;">
+      <div class="nav-user">Hello, <strong id="displayName"></strong></div>
+      <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- LOGIN SECTION -->
+  <section id="loginSection">
+    <div class="login-wrapper">
+
+      <div class="login-hero">
+        <h1>Find Your<br/><span>Nest</span></h1>
+        <p>Ledge.com</p>
+      </div>
+
+      <div class="login-cards">
+
+        <!-- Card 1: Registered User -->
+        <div class="login-card card-user">
+          <h3> Sign In / Register</h3>
+          <p>Save your listings and manage your properties as an owner.</p>
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="userName" placeholder="e.g. Arjun Kumar"/>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="userPhone" placeholder="10-digit mobile number" maxlength="10"/>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="login()">Continue →</button>
+        </div>
+
+        <!-- Card 2: Guest -->
+        <div class="login-card card-guest">
+          <h3> Browse as Guest</h3>
+          <p>Explore PG listings without creating an account. You won't be able to add or delete listings.</p>
+          <div style="background:var(--surface);border-radius:8px;padding:16px;margin-bottom:20px;">
+            <p style="color:var(--muted);font-size:0.82rem;margin-bottom:0;">
+              ✔ View all listings<br/>
+              ✔ Contact owners via WhatsApp<br/>
+              ✖ Cannot add listings<br/>
+              ✖ Cannot delete your posts
+            </p>
+          </div>
+          <button class="btn btn-secondary btn-full" onclick="continueAsGuest()">Browse Without Login</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN APP -->
+  <div id="mainApp">
+    <div class="container">
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-browse" onclick="showSection('browse')">🔍 Browse PGs</button>
+        <button class="tab-btn"        id="tab-add"    onclick="showSection('add')">＋ List Your PG</button>
+      </div>
+
+      <!-- Browse Section -->
+      <div id="browseSection">
+        <div class="filter-bar">
+          <select id="filterType" onchange="loadPGs()">
+            <option value="all">All Types</option>
+            <option value="PG">PG</option>
+            <option value="Hostel">Hostel</option>
+            <option value="Apartment">Apartment</option>
+            <option value="Room">Single Room</option>
+          </select>
+          <select id="filterGender" onchange="loadPGs()">
+            <option value="all">All</option>
+            <option value="Boys">Boys</option>
+            <option value="Girls">Girls</option>
+            <option value="Unisex">Unisex</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="loadPGs()">↻ Refresh</button>
+        </div>
+        <div class="results-meta" id="resultsMeta"></div>
+        <div id="pgList"></div>
+      </div>
+
+      <!-- Add Section -->
+      <div id="addSection" style="display:none;">
+        <div class="add-card">
+          <h3>List Your Property</h3>
+          <p>Fill in the details below to publish your PG listing.</p>
+
+          <div id="guestNotice" class="guest-notice" style="display:none;">
+            ⚠️ You are browsing as a guest.
+            <a href="#" onclick="switchToLogin()" style="color:var(--accent);">Sign in</a>
+            to add a listing.
+          </div>
+
+          <div id="addFormContent">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Property Name *</label>
+                <input type="text" id="pgName" placeholder="e.g. Sunrise PG"/>
+              </div>
+              <div class="form-group">
+                <label>Property Type *</label>
+                <select id="propertyType">
+                  <option value="PG">PG</option>
+                  <option value="Hostel">Hostel</option>
+                  <option value="Apartment">Apartment</option>
+                  <option value="Room">Single Room</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Monthly Rent (₹) *</label>
+                <input type="number" id="pgPrice" placeholder="e.g. 6000"/>
+              </div>
+              <div class="form-group">
+                <label>Room Type *</label>
+                <select id="pgType">
+                  <option value="Single">Single</option>
+                  <option value="Double Sharing">Double Sharing</option>
+                  <option value="Triple Sharing">Triple Sharing</option>
+                  <option value="Dormitory">Dormitory</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Gender *</label>
+                <select id="pgGender">
+                  <option value="Boys">Boys</option>
+                  <option value="Girls">Girls</option>
+                  <option value="Unisex">Unisex</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Contact Number *</label>
+                <input type="tel" id="pgContact" placeholder="WhatsApp number" maxlength="10"/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Location / Address *</label>
+              <input type="text" id="pgLocation" placeholder="e.g. Koramangala, Bangalore"/>
+            </div>
+
+            <div class="form-group">
+              <label>Amenities</label>
+              <input type="text" id="pgAmenities" placeholder="WiFi, AC, Food, Laundry..."/>
+            </div>
+
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="pgDesc" placeholder="Brief description of the property..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Photo</label>
+              <label class="file-label" for="photoFile">📷 Choose photo (JPG/PNG)</label>
+              <input type="file" id="photoFile" accept="image/*" onchange="handleFileSelect(this)"/>
+              <div id="photoName"></div>
+            </div>
+
+            <button class="btn btn-primary btn-full" id="submitBtn" onclick="submitPG()">
+              Publish Listing
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+  </div>
+
+  <!-- JavaScript (ES Module) -->
   <script type="module" src="ledge.js"></script>
+
 </body>
 </html>
+```
+

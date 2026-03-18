@@ -1,208 +1,376 @@
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc }
-      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL }
-      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+// ══════════════════════════════════════════
+//  LEDGE – app.js  (ES Module)
+// ══════════════════════════════════════════
 
-    // 🔥 Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyB2mMkDkSU7CBRcnqhhO87WSj7yWf3lCzo",
-      authDomain: "led-ge.firebaseapp.com",
-      projectId: "led-ge",
-      storageBucket: "led-ge.firebasestorage.app",
-      messagingSenderId: "303796257325",
-      appId: "1:303796257325:web:81ea3d222eb1f476c3eea4",
-      measurementId: "G-R061Y0PYNE"
-    };
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs,
+  query, orderBy, deleteDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+// ── Firebase Config ──────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyB2mMkDkSU7CBRcnqhhO87WSj7yWf3lCzo",
+  authDomain:        "led-ge.firebaseapp.com",
+  projectId:         "led-ge",
+  storageBucket:     "led-ge.firebasestorage.app",
+  messagingSenderId: "303796257325",
+  appId:             "1:303796257325:web:81ea3d222eb1f476c3eea4",
+  measurementId:     "G-R061Y0PYNE"
+};
 
-    let currentUser = null;
+const app     = initializeApp(firebaseConfig);
+const db      = getFirestore(app);
+const storage = getStorage(app);
 
-    // ── Login ──────────────────────────────────────────────
-    function login() {
-      const name  = document.getElementById('userName').value.trim();
-      const phone = document.getElementById('userPhone').value.trim();
+// ── State ────────────────────────────────────────────────
+let currentUser     = null;
+let isGuest         = false;
+let pendingDeleteId = null;
 
-      if (!name || !phone) {
-        alert('Please fill both fields');
-        return;
-      }
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+function init() {
+  const saved = localStorage.getItem('ledgeUser');
+  const guest = localStorage.getItem('ledgeGuest');
 
-      currentUser = { name, phone, id: Date.now() };
-      localStorage.setItem('ledgeUser', JSON.stringify(currentUser));
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    showApp(currentUser.name);
+  } else if (guest === 'true') {
+    isGuest = true;
+    showApp('Guest');
+  }
 
-      document.getElementById('loginSection').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'block';
-      document.getElementById('displayName').textContent = name;
+  // Hide loader after short delay
+  setTimeout(() => {
+    const loader = document.getElementById('loader');
+    loader.style.opacity = '0';
+    setTimeout(() => (loader.style.display = 'none'), 400);
+  }, 900);
+}
 
-      alert('Welcome ' + name + '!');
+// ════════════════════════════════════════════════════════
+//  SHOW APP
+// ════════════════════════════════════════════════════════
+function showApp(name) {
+  document.getElementById('loginSection').style.display = 'none';
+  document.getElementById('mainApp').style.display      = 'block';
+  document.getElementById('navRight').style.display     = 'flex';
+  document.getElementById('displayName').textContent    = name;
+  loadPGs();
+}
+
+// ════════════════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+// ════════════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════════════
+function login() {
+  const name  = document.getElementById('userName').value.trim();
+  const phone = document.getElementById('userPhone').value.trim();
+
+  if (!name || !phone) {
+    toast('Please fill both fields', 'error');
+    return;
+  }
+  if (!/^\d{10}$/.test(phone)) {
+    toast('Enter a valid 10-digit phone number', 'error');
+    return;
+  }
+
+  currentUser = { name, phone, id: Date.now() };
+  localStorage.setItem('ledgeUser', JSON.stringify(currentUser));
+  isGuest = false;
+  showApp(name);
+  toast('Welcome, ' + name + '! 👋', 'success');
+}
+
+function continueAsGuest() {
+  isGuest = true;
+  localStorage.setItem('ledgeGuest', 'true');
+  showApp('Guest');
+  toast('Browsing as guest', 'info');
+}
+
+function switchToLogin() {
+  localStorage.removeItem('ledgeGuest');
+  location.reload();
+}
+
+function logout() {
+  localStorage.removeItem('ledgeUser');
+  localStorage.removeItem('ledgeGuest');
+  location.reload();
+}
+
+// ════════════════════════════════════════════════════════
+//  FILE SELECT
+// ════════════════════════════════════════════════════════
+function handleFileSelect(input) {
+  const f = input.files[0];
+  document.getElementById('photoName').textContent = f ? '✔ ' + f.name : '';
+}
+
+// ════════════════════════════════════════════════════════
+//  SHOW SECTION (TABS)
+// ════════════════════════════════════════════════════════
+function showSection(section) {
+  document.getElementById('browseSection').style.display = 'none';
+  document.getElementById('addSection').style.display    = 'none';
+  document.getElementById('tab-browse').classList.remove('active');
+  document.getElementById('tab-add').classList.remove('active');
+
+  if (section === 'browse') {
+    document.getElementById('browseSection').style.display = 'block';
+    document.getElementById('tab-browse').classList.add('active');
+    loadPGs();
+  } else if (section === 'add') {
+    document.getElementById('addSection').style.display = 'block';
+    document.getElementById('tab-add').classList.add('active');
+
+    if (isGuest) {
+      document.getElementById('guestNotice').style.display          = 'flex';
+      document.getElementById('addFormContent').style.opacity        = '0.4';
+      document.getElementById('addFormContent').style.pointerEvents  = 'none';
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  LOAD PGs FROM FIRESTORE
+// ════════════════════════════════════════════════════════
+async function loadPGs() {
+  const listEl = document.getElementById('pgList');
+  listEl.innerHTML = '<div class="spinner"></div>';
+  document.getElementById('resultsMeta').textContent = '';
+
+  try {
+    const q        = query(collection(db, 'pgs'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+
+    const filterType   = document.getElementById('filterType')?.value   || 'all';
+    const filterGender = document.getElementById('filterGender')?.value || 'all';
+
+    if (snapshot.empty) {
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🏠</div>
+          <h4>No listings yet</h4>
+          <p>Be the first to add a PG!</p>
+        </div>`;
+      return;
     }
 
-    // ── Logout ─────────────────────────────────────────────
-    function logout() {
-      localStorage.removeItem('ledgeUser');
-      location.reload();
-    }
+    const cards = [];
 
-    // ── Show Section ───────────────────────────────────────
-    function showSection(section) {
-      document.getElementById('browseSection').style.display = 'none';
-      document.getElementById('addSection').style.display   = 'none';
+    snapshot.forEach(docSnap => {
+      const pg = docSnap.data();
 
-      if (section === 'browse') {
-        document.getElementById('browseSection').style.display = 'block';
-        loadPGs();
-      } else if (section === 'add') {
-        document.getElementById('addSection').style.display = 'block';
-      }
-    }
+      if (filterType   !== 'all' && pg.propertyType !== filterType)   return;
+      if (filterGender !== 'all' && pg.gender       !== filterGender) return;
 
-    // ── Load PGs from Firestore ────────────────────────────
-    async function loadPGs() {
-      try {
-        const q        = query(collection(db, 'pgs'), orderBy('createdAt', 'desc'));
-        const snapshot = await getDocs(q);
-        const filter   = document.getElementById('filterType')?.value || 'all';
+      const isOwner = currentUser && pg.ownerId === currentUser.id;
 
-        if (snapshot.empty) {
-          document.getElementById('pgList').innerHTML = '<p>No PGs listed yet. Be the first!</p>';
-          return;
-        }
+      const imgHtml = pg.imageUrl
+        ? `<img class="pg-card-img" src="${pg.imageUrl}" alt="Photo"/>`
+        : `<div class="pg-card-img-placeholder">🏘️</div>`;
 
-        let html = '';
-        snapshot.forEach(docSnap => {
-          const pg      = docSnap.data();
-          const isOwner = currentUser && pg.ownerId === currentUser.id;
+      const ownerBadge = isOwner
+        ? `<div class="owner-badge">✏️ Your listing</div>` : '';
 
-          if (filter !== 'all' && pg.propertyType !== filter) return;
+      const deleteBtn = isOwner
+        ? `<button class="btn btn-danger btn-sm delete-btn" data-id="${docSnap.id}">🗑 Delete</button>`
+        : '';
 
-          const imageHtml = pg.imageUrl
-            ? `<img src="${pg.imageUrl}" alt="Property photo"
-                 style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;margin-bottom:8px;">`
-            : '';
+      const amenitiesHtml = pg.amenities
+        ? `<div class="pg-meta-item">✨ <span>${pg.amenities}</span></div>` : '';
 
-          const deleteBtn = isOwner
-            ? `<button data-id="${docSnap.id}" class="delete-btn"
-                 style="margin-top:8px;background:#ef4444;color:white;border:none;
-                        padding:6px 10px;border-radius:6px;cursor:pointer;">
-                 Delete
-               </button>`
-            : '';
+      const descHtml = pg.description
+        ? `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;line-height:1.5;">${pg.description}</p>`
+        : '';
 
-          html += `
-            <div style="border:1px solid #ddd;padding:12px;border-radius:8px;margin-bottom:12px;">
-              ${imageHtml}
-              <h3 style="margin-bottom:6px;">${pg.name} (${pg.propertyType})</h3>
-              <p>📍 ${pg.location}</p>
-              <p>💰 Rent: ₹${pg.price} / month &bull; ${pg.type}</p>
-              <p>📞 ${pg.contact}</p>
-              <a href="https://wa.me/91${pg.contact}" target="_blank"
-                 style="display:inline-block;margin-top:6px;background:#25D366;color:white;
-                        padding:6px 10px;border-radius:6px;text-decoration:none;">
-                Chat on WhatsApp
-              </a>
+      cards.push(`
+        <div class="pg-card">
+          ${imgHtml}
+          <div class="pg-card-body">
+            ${ownerBadge}
+            <div class="pg-card-header">
+              <div class="pg-card-title">${pg.name}</div>
+              <div class="pg-type-badge">${pg.propertyType || 'PG'}</div>
+            </div>
+            ${descHtml}
+            <div class="pg-meta">
+              <div class="pg-meta-item">📍 <span>${pg.location}</span></div>
+              <div class="pg-meta-item">👥 <span>${pg.gender || 'Unisex'} &bull; ${pg.type}</span></div>
+              <div class="pg-meta-item">💰 <strong class="pg-price">₹${pg.price}/mo</strong></div>
+              <div class="pg-meta-item">📞 <span>${pg.contact}</span></div>
+              ${amenitiesHtml}
+            </div>
+            <div class="pg-card-footer">
+              <a href="https://wa.me/91${pg.contact}" target="_blank" class="btn btn-whatsapp">💬 WhatsApp</a>
               ${deleteBtn}
             </div>
-          `;
-        });
+          </div>
+        </div>
+      `);
+    });
 
-        document.getElementById('pgList').innerHTML = html || '<p>No properties match the filter.</p>';
+    if (cards.length === 0) {
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🔍</div>
+          <h4>No matches</h4>
+          <p>Try changing the filters.</p>
+        </div>`;
+    } else {
+      document.getElementById('resultsMeta').textContent =
+        `${cards.length} listing${cards.length !== 1 ? 's' : ''} found`;
+      listEl.innerHTML = `<div class="pg-grid">${cards.join('')}</div>`;
 
-        // Attach delete listeners after rendering
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-          btn.addEventListener('click', () => deletePG(btn.dataset.id));
-        });
-
-      } catch (err) {
-        console.error('Error loading PGs:', err);
-        document.getElementById('pgList').innerHTML = '<p>Error loading PGs</p>';
-      }
+      // Attach delete listeners after rendering
+      listEl.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => openDeleteModal(btn.dataset.id));
+      });
     }
 
-    // ── Submit PG to Firestore ─────────────────────────────
-    async function submitPG() {
-      try {
-        const propertyType = document.getElementById('propertyType').value;
-        const name         = document.getElementById('pgName').value.trim();
-        const price        = document.getElementById('pgPrice').value.trim();
-        const location     = document.getElementById('pgLocation').value.trim();
-        const type         = document.getElementById('pgType').value;
-        const contact      = document.getElementById('pgContact').value.trim();
-        const file         = document.getElementById('pgImage').files[0];
+  } catch (err) {
+    console.error(err);
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">⚠️</div>
+        <h4>Failed to load</h4>
+        <p>${err.message}</p>
+      </div>`;
+  }
+}
 
-        if (!propertyType || !name || !price || !location || !type || !contact) {
-          alert('Please fill all fields');
-          return;
-        }
+// ════════════════════════════════════════════════════════
+//  DELETE MODAL
+// ════════════════════════════════════════════════════════
+function openDeleteModal(id) {
+  pendingDeleteId = id;
+  document.getElementById('deleteModal').classList.add('open');
+}
 
-        let imageUrl = '';
-        if (file) {
-          const imageRef = ref(storage, 'pgImages/' + Date.now());
-          await uploadBytes(imageRef, file);
-          imageUrl = await getDownloadURL(imageRef);
-        }
+function closeDeleteModal() {
+  pendingDeleteId = null;
+  document.getElementById('deleteModal').classList.remove('open');
+}
 
-        await addDoc(collection(db, 'pgs'), {
-          propertyType,
-          name,
-          price: parseInt(price),
-          location,
-          type,
-          contact,
-          imageUrl,
-          ownerId:   currentUser.id,
-          ownerName: currentUser.name,
-          createdAt: new Date()
-        });
+async function deletePG(id) {
+  try {
+    await deleteDoc(doc(db, 'pgs', id));
+    closeDeleteModal();
+    toast('Listing deleted', 'success');
+    loadPGs();
+  } catch (err) {
+    toast('Delete failed: ' + err.message, 'error');
+  }
+}
 
-        alert('PG listed successfully!');
+// Confirm delete button listener
+document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+  if (pendingDeleteId) deletePG(pendingDeleteId);
+});
 
-        // Clear form
-        document.getElementById('propertyType').value = '';
-        document.getElementById('pgName').value       = '';
-        document.getElementById('pgPrice').value      = '';
-        document.getElementById('pgLocation').value   = '';
-        document.getElementById('pgType').value       = '';
-        document.getElementById('pgContact').value    = '';
-        document.getElementById('pgImage').value      = '';
+// ════════════════════════════════════════════════════════
+//  SUBMIT PG TO FIRESTORE
+// ════════════════════════════════════════════════════════
+async function submitPG() {
+  if (isGuest) {
+    toast('Sign in to add a listing', 'error');
+    return;
+  }
 
-        showSection('browse');
-      } catch (err) {
-        console.error('Error adding PG:', err);
-        alert('Error listing PG. Check console.');
-      }
+  const propertyType = document.getElementById('propertyType').value;
+  const name         = document.getElementById('pgName').value.trim();
+  const price        = document.getElementById('pgPrice').value.trim();
+  const type         = document.getElementById('pgType').value;
+  const gender       = document.getElementById('pgGender').value;
+  const contact      = document.getElementById('pgContact').value.trim();
+  const location     = document.getElementById('pgLocation').value.trim();
+  const amenities    = document.getElementById('pgAmenities').value.trim();
+  const description  = document.getElementById('pgDesc').value.trim();
+  const photoFile    = document.getElementById('photoFile').files[0];
+
+  if (!name || !price || !contact || !location) {
+    toast('Please fill all required fields *', 'error');
+    return;
+  }
+  if (!/^\d{10}$/.test(contact)) {
+    toast('Enter a valid 10-digit contact number', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Uploading…';
+  btn.disabled = true;
+
+  try {
+    let imageUrl = '';
+    if (photoFile) {
+      const storageRef = ref(storage, `pg-photos/${Date.now()}_${photoFile.name}`);
+      await uploadBytes(storageRef, photoFile);
+      imageUrl = await getDownloadURL(storageRef);
     }
 
-    // ── Delete PG ─────────────────────────────────────────
-    async function deletePG(id) {
-      if (confirm('Are you sure you want to delete this PG?')) {
-        try {
-          await deleteDoc(doc(db, 'pgs', id));
-          loadPGs();
-        } catch (err) {
-          console.error('Error deleting PG:', err);
-          alert('Error deleting PG');
-        }
-      }
-    }
+    await addDoc(collection(db, 'pgs'), {
+      name, propertyType, price, type, gender,
+      contact, location, amenities, description,
+      imageUrl,
+      ownerId:   currentUser?.id   || null,
+      ownerName: currentUser?.name || 'Unknown',
+      createdAt: Date.now()
+    });
 
-    // ── Wire up buttons ────────────────────────────────────
-    document.getElementById('loginBtn').addEventListener('click', login);
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-    document.getElementById('browsBtn').addEventListener('click', () => showSection('browse'));
-    document.getElementById('addBtn').addEventListener('click', () => showSection('add'));
-    document.getElementById('submitBtn').addEventListener('click', submitPG);
-    document.getElementById('backBtn').addEventListener('click', () => showSection('browse'));
-    document.getElementById('filterType').addEventListener('change', loadPGs);
+    toast('🎉 Listing published!', 'success');
 
-    // ── Auto-login if session saved ────────────────────────
-    const saved = localStorage.getItem('ledgeUser');
-    if (saved) {
-      currentUser = JSON.parse(saved);
-      document.getElementById('loginSection').style.display = 'none';
-      document.getElementById('mainApp').style.display      = 'block';
-      document.getElementById('displayName').textContent    = currentUser.name;
-    }
+    // Reset form fields
+    ['pgName', 'pgPrice', 'pgContact', 'pgLocation', 'pgAmenities', 'pgDesc'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('photoFile').value   = '';
+    document.getElementById('photoName').textContent = '';
+
+    showSection('browse');
+
+  } catch (err) {
+    toast('Error: ' + err.message, 'error');
+    console.error(err);
+  } finally {
+    btn.textContent = '🚀 Publish Listing';
+    btn.disabled    = false;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  EXPOSE TO GLOBAL SCOPE
+//  (Required because type="module" isolates scope — this
+//   fixes "function is not defined" errors from onclick="")
+// ════════════════════════════════════════════════════════
+window.login            = login;
+window.continueAsGuest  = continueAsGuest;
+window.logout           = logout;
+window.showSection      = showSection;
+window.loadPGs          = loadPGs;
+window.submitPG         = submitPG;
+window.handleFileSelect = handleFileSelect;
+window.closeDeleteModal = closeDeleteModal;
+window.switchToLogin    = switchToLogin;
+
+// ── Kick off ─────────────────────────────────────────────
+init();
