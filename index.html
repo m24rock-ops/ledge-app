@@ -1,46 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ledge - PG Finder</title>
+  <title>Ledge - PG or(room) Finder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #f5f5f5; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    button { background: #6c3fff; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; }
-    button:hover { background: #5b21b6; }
-    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
-    h1 { color: #6c3fff; margin-bottom: 20px; }
-    h2 { font-size: 18px; margin-bottom: 12px; }
-    label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; }
-  </style>
+  <link rel="stylesheet" href="ledge.css">
 </head>
 <body>
   <div class="container">
     <!-- LOGIN SECTION -->
     <div id="loginSection" class="card">
-      <h1>🏠 Ledge - PG Finder</h1>
+      <h1>🏠 Ledge - PG or (Room) Finder</h1>
       <label>Your Name</label>
       <input type="text" id="userName" placeholder="Enter your name">
       <label>Phone Number</label>
       <input type="tel" id="userPhone" placeholder="Enter your phone">
-      <button onclick="login()">Get Started</button>
+      <button  type ="radio"id="loginBtn">Get Started</button>
     </div>
 
     <!-- MAIN APP (hidden initially) -->
     <div id="mainApp" style="display:none;">
       <div class="card">
         <h1>Welcome, <span id="displayName"></span>!</h1>
-        <button onclick="showSection('browse')">Browse PGs</button>
-        <button onclick="showSection('add')" style="margin-top:12px;">List Your PG</button>
-        <button onclick="logout()" style="margin-top:12px;background:#dc2626;">Logout</button>
+        <button id="browsBtn">Browse PGs or Rooms</button>
+        <button id="addBtn" style="margin-top:12px;">List Your PG or Room</button>
+        <button id="logoutBtn" style="margin-top:12px;background:#dc2626;">Logout</button>
       </div>
 
       <!-- BROWSE PGs -->
       <div id="browseSection" style="display:none;">
         <div class="card">
-          <h2>Available PGs</h2>
+          <label>Filter Property</label>
+          <select id="filterType">
+            <option value="all">All</option>
+            <option value="PG">PG</option>
+            <option value="Room">Room</option>
+          </select>
+          <h2>Available properties</h2>
           <div id="pgList">Loading...</div>
         </div>
       </div>
@@ -49,15 +44,23 @@
       <div id="addSection" style="display:none;">
         <div class="card">
           <h2>List Your PG</h2>
+
+          <label>Property Type</label>
+          <select id="propertyType">
+            <option value="">Select</option>
+            <option value="PG">PG</option>
+            <option value="Room">Room</option>
+          </select>
+
           <label>PG Name</label>
           <input type="text" id="pgName" placeholder="e.g. Sunrise PG">
-          
+
           <label>Monthly Rent (₹)</label>
-          <input type="number" id="pgPrice" placeholder="e.g. 6000">
-          
+          <input type="number" id="pgPrice" placeholder="e.g. 6000" step="500">
+
           <label>Location</label>
           <input type="text" id="pgLocation" placeholder="e.g. Koramangala, Bengaluru">
-          
+
           <label>Room Type</label>
           <select id="pgType">
             <option value="">Select</option>
@@ -65,167 +68,19 @@
             <option value="2 Sharing">2 Sharing</option>
             <option value="3 Sharing">3 Sharing</option>
           </select>
-          
+
           <label>Contact Number</label>
           <input type="tel" id="pgContact" placeholder="Your phone number">
-          
-          <button onclick="submitPG()">List Your PG</button>
-          <button onclick="showSection('browse')" style="margin-top:12px;background:#6b7280;">Back</button>
+
+          <label>Property Photo</label>
+          <input type="file" id="pgImage" accept="image/*">
+
+          <button id="submitBtn">List Your PG</button>
+          <button id="backBtn" style="margin-top:12px;background:#6b7280;">Back</button>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-    // 🔥 PASTE YOUR FIREBASE CONFIG HERE
-   const firebaseConfig = {
-  apiKey: "AIzaSyB2mMkDkSU7CBRcnqhhO87WSj7yWf3lCzo",
-  authDomain: "led-ge.firebaseapp.com",
-  projectId: "led-ge",
-  storageBucket: "led-ge.firebasestorage.app",
-  messagingSenderId: "303796257325",
-  appId: "1:303796257325:web:81ea3d222eb1f476c3eea4",
-  measurementId: "G-R061Y0PYNE"
-};
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Store globally
-    window.db = db;
-    window.addDoc = addDoc;
-    window.getDocs = getDocs;
-    window.collection = collection;
-    window.query = query;
-    window.orderBy = orderBy;
-  </script>
-
-  <script>
-    let currentUser = null;
-
-    // Login
-    function login() {
-      const name = document.getElementById('userName').value.trim();
-      const phone = document.getElementById('userPhone').value.trim();
-      
-      if (!name || !phone) {
-        alert('Please fill both fields');
-        return;
-      }
-
-      currentUser = { name, phone, id: Date.now() };
-      localStorage.setItem('ledgeUser', JSON.stringify(currentUser));
-      
-      document.getElementById('loginSection').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'block';
-      document.getElementById('displayName').textContent = name;
-      
-      alert('Welcome ' + name + '!');
-    }
-
-    // Logout
-    function logout() {
-      localStorage.removeItem('ledgeUser');
-      location.reload();
-    }
-
-    // Show section
-    function showSection(section) {
-      document.getElementById('browseSection').style.display = 'none';
-      document.getElementById('addSection').style.display = 'none';
-      
-      if (section === 'browse') {
-        document.getElementById('browseSection').style.display = 'block';
-        loadPGs();
-      } else if (section === 'add') {
-        document.getElementById('addSection').style.display = 'block';
-      }
-    }
-
-    // Load PGs from Firebase
-    async function loadPGs() {
-      try {
-        const q = query(collection(window.db, 'pgs'), orderBy('createdAt', 'desc'));
-        const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          document.getElementById('pgList').innerHTML = '<p>No PGs listed yet. Be the first!</p>';
-          return;
-        }
-
-        let html = '';
-        snapshot.forEach(doc => {
-          const pg = doc.data();
-          html += `
-            <div style="border:1px solid #ddd;padding:12px;border-radius:8px;margin-bottom:12px;">
-              <h3 style="margin-bottom:6px;">${pg.name}</h3>
-              <p>📍 ${pg.location}</p>
-              <p>💰 ₹${pg.price}/month • ${pg.type}</p>
-              <p>📞 ${pg.contact}</p>
-            </div>
-          `;
-        });
-        
-        document.getElementById('pgList').innerHTML = html;
-      } catch (err) {
-        console.error('Error loading PGs:', err);
-        document.getElementById('pgList').innerHTML = '<p>Error loading PGs</p>';
-      }
-    }
-
-    // Submit PG to Firebase
-    async function submitPG() {
-      const name = document.getElementById('pgName').value.trim();
-      const price = document.getElementById('pgPrice').value.trim();
-      const location = document.getElementById('pgLocation').value.trim();
-      const type = document.getElementById('pgType').value;
-      const contact = document.getElementById('pgContact').value.trim();
-
-      if (!name || !price || !location || !type || !contact) {
-        alert('Please fill all fields');
-        return;
-      }
-
-      try {
-        await addDoc(collection(window.db, 'pgs'), {
-          name,
-          price: parseInt(price),
-          location,
-          type,
-          contact,
-          ownerId: currentUser.id,
-          ownerName: currentUser.name,
-          createdAt: new Date()
-        });
-
-        alert('✅ PG listed successfully!');
-        
-        // Clear form
-        document.getElementById('pgName').value = '';
-        document.getElementById('pgPrice').value = '';
-        document.getElementById('pgLocation').value = '';
-        document.getElementById('pgType').value = '';
-        document.getElementById('pgContact').value = '';
-        
-        showSection('browse');
-      } catch (err) {
-        console.error('Error adding PG:', err);
-        alert('Error listing PG. Check console for details.');
-      }
-    }
-
-    // Check if already logged in
-    const saved = localStorage.getItem('ledgeUser');
-    if (saved) {
-      currentUser = JSON.parse(saved);
-      document.getElementById('loginSection').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'block';
-      document.getElementById('displayName').textContent = currentUser.name;
-    }
-  </script>
+  <script type="module" src="ledge.js"></script>
 </body>
 </html>

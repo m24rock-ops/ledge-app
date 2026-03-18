@@ -1,0 +1,324 @@
+/* ================================================
+   Ledge - PG Finder | styles.css
+   ================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+/* ── CSS Variables ── */
+:root {
+  --brand:       #5c30eb;
+  --brand-dark:  #8b24f3;
+  --brand-light: #ede9ff;
+  --brand-glow:  rgba(108, 63, 255, 0.18);
+
+  --danger:      #dc2626;
+  --danger-dark: #b91c1c;
+
+  --neutral:     #6b7280;
+  --neutral-dark:#4b5563;
+
+  --text-primary:   #111827;
+  --text-secondary: #6b7280;
+  --text-muted:     #9ca3af;
+
+  --bg-page:    #f0ecff;
+  --bg-card:    #ffffff;
+  --border:     #e5e7eb;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 16px rgba(108,63,255,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-lg:  0 8px 32px rgba(108,63,255,0.14), 0 2px 8px rgba(0,0,0,0.08);
+
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  20px;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans',calibri, 'Trebuchet MS', sans-serif;
+
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg-page);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(108,63,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(108,63,255,0.08) 0%, transparent 60%);
+  min-height: 100vh;
+}
+
+/* ── Layout ── */
+.container {
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 28px 28px 24px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(108,63,255,0.07);
+  animation: fadeUp 0.35s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Headings ── */
+h1 {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--brand);
+  margin-bottom: 22px;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+h1 span {
+  color: var(--text-primary);
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.3px;
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+/* ── Labels ── */
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+/* ── Inputs & Select & Textarea ── */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: #fafafa;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--brand);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--brand-glow);
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* ── Buttons ── */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 13px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: var(--brand);
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background var(--transition);
+}
+
+button:hover {
+  background: var(--brand-dark);
+  box-shadow: 0 4px 16px rgba(108,63,255,0.35);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Button variants via inline style overrides — keep compatible */
+button[style*="background:#6b7280"],
+button[style*="background: #6b7280"] {
+  background: var(--neutral) !important;
+}
+button[style*="background:#6b7280"]:hover,
+button[style*="background: #6b7280"]:hover {
+  background: var(--neutral-dark) !important;
+  box-shadow: 0 4px 12px rgba(107,114,128,0.3);
+}
+
+button[style*="background:#dc2626"],
+button[style*="background: #dc2626"] {
+  background: var(--danger) !important;
+}
+button[style*="background:#dc2626"]:hover,
+button[style*="background: #dc2626"]:hover {
+  background: var(--danger-dark) !important;
+  box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+}
+
+/* Button spacing when stacked */
+button + button {
+  margin-top: 10px;
+}
+
+/* ── PG Listing Cards ── */
+#pgList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#pgList > div {
+  border: 1.5px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 16px !important;
+  margin-bottom: 0 !important;
+  background: #fafbff;
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+#pgList > div::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--brand) 0%, #a78bfa 100%);
+  border-radius: 3px 0 0 3px;
+}
+
+#pgList > div:hover {
+  box-shadow: var(--shadow-lg) !important;
+  transform: translateY(-2px);
+  border-color: rgba(108,63,255,0.25) !important;
+}
+
+#pgList > div h3 {
+  padding-left: 10px;
+  color: var(--brand);
+}
+
+#pgList > div p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#pgList > div p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Empty / Error State ── */
+#pgList > p {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 32px 0;
+  font-size: 14px;
+}
+
+/* ── App Header Welcome ── */
+#mainApp > .card > h1 {
+  margin-bottom: 18px;
+}
+
+/* ── Divider utility ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* ── Scrollbar (Webkit) ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(108,63,255,0.25); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .container { padding: 18px 14px 50px; }
+  .card { padding: 22px 18px 20px; border-radius: var(--radius-md); }
+  h1 { font-size: 22px; }
+}
