@@ -522,32 +522,32 @@
   ════════════════════════════════════════════ -->
   <div id="mainApp" style="display:none;">
     <div class="container">
-      <section class="app-hero">
-        <div class="hero-copy">
-          <span class="eyebrow">Smarter PG discovery</span>
-          <h1>Find a stay that matches your budget, area, and vibe.</h1>
-          <p>Browse verified listings, compare options quickly, and contact owners without leaving the app.</p>
+      <section class="app-hero compact-hero">
+        <div class="hero-copy hero-copy-compact">
+          <span class="eyebrow">Find your next stay</span>
+          <h1>Pick a PG without the confusion.</h1>
+          <p>Search, filter, compare, and contact owners in a few taps.</p>
         </div>
-        <div class="hero-stats">
-          <div class="stat-card">
+        <div class="hero-stats hero-stats-inline">
+          <div class="stat-card mini-stat">
             <span class="stat-value" id="statTotal">0</span>
-            <span class="stat-label">Total listings</span>
+            <span class="stat-label">Listings</span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card mini-stat">
             <span class="stat-value" id="statAvailable">0</span>
-            <span class="stat-label">Available now</span>
+            <span class="stat-label">Available</span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card mini-stat">
             <span class="stat-value" id="statLocations">0</span>
-            <span class="stat-label">Locations</span>
+            <span class="stat-label">Areas</span>
           </div>
         </div>
       </section>
 
       <!-- Tabs -->
       <div class="tabs">
-        <button class="tab-btn active" id="tab-browse" onclick="showSection('browse')">🔍 Browse PGs</button>
-        <button class="tab-btn"        id="tab-add"    onclick="showSection('add')">＋ List Your PG</button>
+        <button class="tab-btn active" id="tab-browse" onclick="showSection('browse')">Browse</button>
+        <button class="tab-btn"        id="tab-add"    onclick="showSection('add')">List PG</button>
       </div>
 
       <!-- ── BROWSE ─────────────────────────── -->
@@ -559,9 +559,9 @@
               <button class="filters-close-btn" onclick="closeFilters()" aria-label="Close filters">✕</button>
               <div>
                 <span class="eyebrow">Filters</span>
-                <h2>Find the right PG faster</h2>
+                <h2>Refine your search</h2>
               </div>
-              <button class="btn btn-secondary btn-sm" onclick="clearAllFilters()">Reset</button>
+              <button class="btn btn-secondary btn-sm filters-reset-btn" onclick="clearAllFilters()">Reset all</button>
             </div>
 
             <div class="filter-stack">
@@ -633,26 +633,24 @@
 
           <div class="results-column">
             <div class="results-topbar">
-              <div class="topbar-actions compact-panel">
-                <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilters()">☰ Filters</button>
-                <span class="topbar-note">Open filters only when you need them</span>
-              </div>
-
-              <div class="search-panel compact-panel">
+              <div class="toolbar-search compact-panel">
                 <label for="searchInput">Search</label>
                 <input type="text" id="searchInput"
-                  placeholder="Search by area, property name, amenities..."
+                  placeholder="Area, property name, amenities..."
                   oninput="debouncedSearch()"/>
               </div>
 
-              <div class="sort-card compact-panel">
-                <label for="sortBy">Sort by</label>
-                <select id="sortBy" onchange="loadPGs()">
-                  <option value="newest">Newest first</option>
-                  <option value="price-low">Budget low to high</option>
-                  <option value="price-high">Budget high to low</option>
-                  <option value="distance-near">Nearest to college</option>
-                </select>
+              <div class="toolbar-actions compact-panel">
+                <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilters()">☰ Filters</button>
+                <div class="sort-inline">
+                  <label for="sortBy">Sort</label>
+                  <select id="sortBy" onchange="loadPGs()">
+                    <option value="newest">Newest first</option>
+                    <option value="price-low">Lowest budget</option>
+                    <option value="price-high">Highest budget</option>
+                    <option value="distance-near">Nearest college</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -777,6 +775,7 @@
   <script type="module" src="ledge.js"></script>
 </body>
 </html>
+
 
 
 

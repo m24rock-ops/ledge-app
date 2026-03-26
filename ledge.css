@@ -1067,3 +1067,275 @@ body.filters-panel-open {
   overflow: hidden;
 }
 
+
+nav {
+  height: 72px;
+  padding: 0 18px;
+}
+
+.nav-brand {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+}
+
+.nav-right {
+  gap: 10px;
+}
+
+.nav-user {
+  font-size: 0.95rem;
+}
+
+.btn-logout {
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+
+.compact-hero {
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin: 18px 0 16px;
+}
+
+.hero-copy-compact {
+  padding: 22px 20px;
+  border-radius: 24px;
+}
+
+.hero-copy-compact h1 {
+  font-size: clamp(2rem, 8vw, 3.2rem);
+  max-width: 10ch;
+  margin: 12px 0 10px;
+}
+
+.hero-copy-compact p {
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.hero-stats-inline {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.mini-stat {
+  min-height: auto;
+  padding: 14px 12px;
+  border-radius: 18px;
+}
+
+.mini-stat .stat-value {
+  font-size: 1.45rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.mini-stat .stat-label {
+  font-size: 0.78rem;
+}
+
+.tabs {
+  padding: 6px;
+  border-radius: 18px;
+  margin-bottom: 14px;
+}
+
+.tab-btn {
+  min-height: 52px;
+  font-size: 0.95rem;
+  border-radius: 14px;
+}
+
+.results-column {
+  gap: 14px;
+}
+
+.results-topbar {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.toolbar-search,
+.toolbar-actions {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(223, 231, 248, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 16px 32px rgba(67, 97, 171, 0.08);
+}
+
+.toolbar-search {
+  display: grid;
+  gap: 10px;
+}
+
+.toolbar-search label,
+.sort-inline label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.toolbar-search input,
+.sort-inline select {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #f8fbff;
+  padding: 12px 14px;
+  font-size: 0.94rem;
+}
+
+.toolbar-actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+.sort-inline {
+  display: grid;
+  gap: 8px;
+}
+
+.filter-toggle-btn {
+  min-width: 128px;
+  min-height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1e224f, #4153bf);
+  color: #fff;
+  border: none;
+}
+
+.filters-card {
+  width: min(88vw, 340px);
+  padding: 86px 18px 24px;
+  background: #ffffff;
+  border-right: 1px solid #edf1fa;
+  box-shadow: 24px 0 60px rgba(17, 24, 39, 0.18);
+}
+
+.section-card-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 12px;
+}
+
+.section-card-head > div {
+  grid-column: 1 / 2;
+}
+
+.filters-close-btn {
+  grid-column: 2 / 3;
+}
+
+.filters-reset-btn {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.filter-stack {
+  margin-top: 18px;
+}
+
+.filter-group-block {
+  padding: 14px;
+  border: 1px solid #eef2fb;
+  border-radius: 18px;
+  background: #f9fbff;
+}
+
+.results-summary {
+  padding: 2px 2px 6px;
+}
+
+.results-meta {
+  font-size: 0.92rem;
+}
+
+.pg-grid {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.pg-card {
+  border-radius: 22px;
+  box-shadow: 0 14px 28px rgba(30, 41, 59, 0.08);
+}
+
+.pg-card-body {
+  padding: 16px;
+}
+
+.pg-card-footer {
+  padding: 0 16px 16px;
+}
+
+.result-feature-badges {
+  gap: 6px;
+}
+
+.feature-badge {
+  background: #f1f5ff;
+  color: #3f4e71;
+}
+
+@media (min-width: 768px) {
+  nav {
+    padding: 0 28px;
+  }
+
+  .container {
+    padding: 0 24px;
+  }
+
+  .results-topbar {
+    grid-template-columns: minmax(0, 1fr) 290px;
+  }
+
+  .pg-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1080px) {
+  .compact-hero {
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    align-items: stretch;
+  }
+
+  .hero-copy-compact {
+    padding: 30px;
+  }
+
+  .results-topbar {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+
+  .pg-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .nav-user {
+    display: none;
+  }
+
+  .btn-logout {
+    padding: 8px 12px;
+    font-size: 0.84rem;
+  }
+
+  .toolbar-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-toggle-btn {
+    width: 100%;
+  }
+}
