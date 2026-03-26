@@ -870,7 +870,7 @@
       <section class="app-hero compact-hero">
         <div class="hero-copy hero-copy-compact">
           <span class="eyebrow">Find your next stay</span>
-          <h1>Pick a PG without the confusion.</h1>
+          <h1>Pick a stay without the confusion.</h1>
           <p>Search, filter, compare, and contact owners in a few taps.</p>
         </div>
         <div class="hero-stats hero-stats-inline">
@@ -951,16 +951,6 @@
               </div>
 
               <div class="filter-group-block">
-                <label for="filterDistance">Distance from college</label>
-                <select id="filterDistance" onchange="loadPGs()">
-                  <option value="all">Any distance</option>
-                  <option value="1">Within 1 km</option>
-                  <option value="3">Within 3 km</option>
-                  <option value="5">Within 5 km</option>
-                </select>
-              </div>
-
-              <div class="filter-group-block">
                 <label>Must have</label>
                 <label class="check-row"><input type="checkbox" id="filterFood" onchange="loadPGs()"/> Food included 🍛</label>
                 <label class="check-row"><input type="checkbox" id="filterWifi" onchange="loadPGs()"/> WiFi 📶</label>
@@ -993,7 +983,6 @@
                     <option value="newest">Newest first</option>
                     <option value="price-low">Lowest budget</option>
                     <option value="price-high">Highest budget</option>
-                    <option value="distance-near">Nearest college</option>
                   </select>
                 </div>
               </div>
@@ -1086,10 +1075,6 @@
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label>Distance From College (km) *</label>
-                <input type="number" id="pgDistance" min="0" max="50" step="0.1" placeholder="e.g. 1.5"/>
-              </div>
               <div class="form-group">
                 <label>Amenities</label>
                 <input type="text" id="pgAmenities" placeholder="Laundry, AC, Parking..."/>

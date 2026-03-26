@@ -126,7 +126,9 @@ function showApp(name) {
   document.getElementById('loginSection').style.display = 'none';
   document.getElementById('mainApp').style.display      = 'block';
   document.getElementById('navRight').style.display     = 'flex';
-  document.getElementById('displayName').textContent    = name;
+  document.getElementById('displayName').textContent    = isGuest ? 'Guest' : name;
+  const logoutBtn = document.querySelector('.btn-logout');
+  if (logoutBtn) logoutBtn.textContent = isGuest ? 'Exit Guest' : 'Sign Out';
   loadPGs();
 }
 
@@ -222,7 +224,7 @@ async function sendOTP() {
     toast(msg, 'error');
     window.recaptchaVerifier = null;
   } finally {
-    btn.textContent = 'Continue →';
+    btn.textContent = 'Continue';
     btn.disabled    = false;
   }
 }
@@ -267,7 +269,7 @@ async function verifyOTP() {
       'error'
     );
   } finally {
-    btn.textContent = 'Verify & Continue →';
+    btn.textContent = 'Verify';
     btn.disabled    = false;
   }
 }
@@ -316,7 +318,7 @@ async function saveNewPassword() {
     console.error(err);
     toast('Could not save password: ' + err.message, 'error');
   } finally {
-    btn.textContent = '🔒 Save Password';
+    btn.textContent = 'Save password';
     btn.disabled    = false;
   }
 }
@@ -430,7 +432,7 @@ async function sendPasswordReset() {
       toast(err.message, 'error');
     }
   } finally {
-    btn.textContent = 'Send Reset Link';
+    btn.textContent = 'Send reset link';
     btn.disabled    = false;
   }
 }
@@ -525,10 +527,10 @@ function togglePwVisibility(inputId, btn) {
   if (!input) return;
   if (input.type === 'password') {
     input.type   = 'text';
-    btn.textContent = '🙈';
+    btn.textContent = 'Hide';
   } else {
     input.type   = 'password';
-    btn.textContent = '👁';
+    btn.textContent = 'Show';
   }
 }
 
@@ -536,6 +538,7 @@ function togglePwVisibility(inputId, btn) {
 //  AUTH — Guest / Logout
 // ════════════════════════════════════════════════════════
 function continueAsGuest() {
+  currentUser = null;
   isGuest = true;
   localStorage.setItem('ledgeGuest', 'true');
   showApp('Guest');
