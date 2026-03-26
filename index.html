@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LedGe – Find Your PG</title>
+  <title>LedGe – Find Your stay</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="ledge.css"/>
   <style>
@@ -320,6 +320,331 @@
       margin-bottom: 12px;
     }
   </style>
+  <style>
+    #loginSection {
+      min-height: 100vh;
+      padding: 32px 18px 48px;
+      background:
+        radial-gradient(circle at top right, rgba(252, 175, 69, 0.22), transparent 20%),
+        radial-gradient(circle at top left, rgba(131, 58, 180, 0.18), transparent 24%),
+        linear-gradient(180deg, #fafafa 0%, #f5f7fb 100%);
+    }
+
+    .auth-shell {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(320px, 1fr) minmax(340px, 430px);
+      gap: 42px;
+      align-items: center;
+    }
+
+    .auth-preview-panel {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 640px;
+    }
+
+    .preview-glow {
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 127, 80, 0.16), rgba(131, 58, 180, 0.08), transparent 70%);
+      filter: blur(12px);
+    }
+
+    .preview-phone-frame {
+      position: relative;
+      width: 320px;
+      padding: 16px;
+      border-radius: 42px;
+      background: linear-gradient(160deg, #22253a, #11131d);
+      box-shadow: 0 28px 70px rgba(17, 24, 39, 0.28);
+    }
+
+    .preview-phone-screen {
+      border-radius: 30px;
+      padding: 24px;
+      min-height: 600px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
+      display: grid;
+      align-content: start;
+      gap: 18px;
+    }
+
+    .preview-brand,
+    .instagram-inspired-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.06em;
+      color: #1d1f3c;
+    }
+
+    .preview-brand span,
+    .instagram-inspired-logo span {
+      color: #ff6b35;
+    }
+
+    .preview-card {
+      padding: 18px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #f9f5ff, #fff5ef);
+      border: 1px solid rgba(131, 58, 180, 0.08);
+    }
+
+    .preview-pill {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(131, 58, 180, 0.1);
+      color: #7a41cc;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .preview-card h2 {
+      font-size: 1.8rem;
+      line-height: 1.05;
+      margin-bottom: 10px;
+      color: #202342;
+    }
+
+    .preview-card p,
+    .preview-mini-item span,
+    .auth-tagline,
+    .auth-footnote,
+    .auth-security-note,
+    .guest-card-copy {
+      color: #67728a;
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .preview-mini-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .preview-mini-item {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #f8f9ff;
+      border: 1px solid #edf0f7;
+      display: grid;
+      gap: 4px;
+    }
+
+    .preview-mini-item strong,
+    .guest-card-title {
+      font-size: 0.95rem;
+      color: #1f2541;
+    }
+
+    .auth-main-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .auth-stack-card {
+      background: rgba(255,255,255,0.96);
+      border: 1px solid #e8ebf3;
+      border-radius: 26px;
+      padding: 28px 24px;
+      box-shadow: 0 16px 40px rgba(18, 26, 42, 0.08);
+    }
+
+    .brand-card {
+      text-align: center;
+      padding: 22px 24px;
+    }
+
+    .auth-card-clean {
+      padding: 28px 24px;
+    }
+
+    .auth-title-block {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .auth-title-block h3 {
+      font-size: 1.45rem;
+      margin-bottom: 6px;
+      color: #1f2541;
+    }
+
+    .auth-tabs-clean {
+      background: #f4f6fb;
+      border: 1px solid #ebedf4;
+      padding: 5px;
+      border-radius: 16px;
+      margin-bottom: 18px;
+    }
+
+    .auth-tab-btn {
+      color: #68748d;
+      min-height: 44px;
+      font-weight: 700;
+      border-radius: 12px;
+    }
+
+    .auth-tab-btn.active {
+      background: #fff;
+      color: #1f2541;
+      box-shadow: 0 4px 14px rgba(17, 24, 39, 0.08);
+    }
+
+    .auth-group-clean label {
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #5e6b86;
+      margin-bottom: 8px;
+    }
+
+    .auth-group-clean input {
+      background: #fafbfe;
+      border: 1px solid #e4e8f1;
+      border-radius: 14px;
+      color: #151933;
+      min-height: 52px;
+      padding: 0 16px;
+      font-size: 0.96rem;
+    }
+
+    .auth-group-clean input:focus {
+      border-color: #3897f0;
+      box-shadow: 0 0 0 4px rgba(56, 151, 240, 0.12);
+    }
+
+    .clean-pw-wrap input {
+      padding-right: 74px;
+    }
+
+    .pw-toggle {
+      right: 12px;
+      color: #3897f0;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .pw-toggle:hover {
+      color: #246fd0;
+    }
+
+    .auth-btn-clean {
+      min-height: 48px;
+      border-radius: 14px;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #3897f0, #246fd0);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.96rem;
+      font-weight: 700;
+    }
+
+    .auth-btn-ghost-clean {
+      min-height: 46px;
+      border-radius: 14px;
+      margin-top: 10px;
+      font-weight: 700;
+      color: #485570;
+      background: #f8f9fc;
+      border-color: #e8ebf3;
+    }
+
+    .auth-link {
+      color: #3897f0;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .auth-inline-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -2px;
+      margin-bottom: 6px;
+    }
+
+    .auth-footnote,
+    .auth-security-note {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 0.84rem;
+    }
+
+    .auth-optional-name {
+      margin-top: 14px;
+    }
+
+    .otp-group-clean #otpInput {
+      letter-spacing: 0.35em;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .guest-card-clean {
+      text-align: center;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .guest-btn-clean {
+      margin-top: 14px;
+      width: 100%;
+    }
+
+    #recaptcha-container {
+      min-height: 1px;
+    }
+
+    @media (max-width: 980px) {
+      #loginSection {
+        padding-top: 24px;
+      }
+
+      .auth-shell {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        max-width: 460px;
+      }
+
+      .auth-preview-panel {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      #loginSection {
+        padding: 18px 12px 32px;
+      }
+
+      .auth-stack-card,
+      .auth-card-clean,
+      .brand-card,
+      .guest-card-clean {
+        border-radius: 22px;
+        padding: 22px 18px;
+      }
+
+      .instagram-inspired-logo {
+        font-size: 2.3rem;
+      }
+
+      .auth-title-block h3 {
+        font-size: 1.28rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -370,150 +695,170 @@
        AUTH SECTION
   ════════════════════════════════════════════ -->
   <section id="loginSection">
-    <div class="auth-container">
-
-      <div class="auth-logo">
-        <div class="brand">Led<span>Ge</span></div>
-        <div class="tagline">Find your perfect PG, effortlessly.</div>
-      </div>
-
-      <div class="auth-card">
-
-        <!-- ── STEP 1: Main login form ── -->
-        <div id="authStep1" class="auth-step show">
-          <h3>Welcome back 👋</h3>
-          <p class="auth-subtitle">Sign in or create your account to continue.</p>
-
-          <!-- Phone / Email tabs -->
-          <div class="auth-tabs">
-            <button class="auth-tab-btn active" id="tabPhone" onclick="switchAuthMode('phone')">📱 Phone OTP</button>
-            <button class="auth-tab-btn"         id="tabEmail" onclick="switchAuthMode('email')">✉️ Email</button>
-          </div>
-
-          <!-- Name -->
-          <div class="auth-group">
-            <label>Your Name</label>
-            <input type="text" id="userName" placeholder="e.g. Arjun Kumar" autocomplete="name"/>
-          </div>
-
-          <!-- Phone mode -->
-          <div id="phoneFields">
-            <div class="auth-group">
-              <label>Phone Number</label>
-              <input type="tel" id="userPhone" placeholder="10-digit mobile number"
-                     inputmode="numeric" maxlength="10"
-                     oninput="this.value=this.value.replace(/\D/g,'')"
-                     onkeydown="if(event.key==='Enter') handleContinue()"/>
+    <div class="auth-shell">
+      <div class="auth-preview-panel">
+        <div class="preview-glow"></div>
+        <div class="preview-phone-frame">
+          <div class="preview-phone-screen">
+            <div class="preview-brand">Led<span>Ge</span></div>
+            <div class="preview-card">
+              <span class="preview-pill">Safe and simple</span>
+              <h2>Find your PG with less stress.</h2>
+              <p>Search nearby stays, compare options, and connect with owners in minutes.</p>
             </div>
-          </div>
-
-          <!-- Email mode -->
-          <div id="emailFields" style="display:none;">
-            <div class="auth-group">
-              <label>Email Address</label>
-              <input type="email" id="userEmail" placeholder="you@example.com"
-                     autocomplete="email"
-                     onkeydown="if(event.key==='Enter') handleContinue()"/>
-            </div>
-            <div class="auth-group">
-              <label>Password</label>
-              <div class="pw-wrap">
-                <input type="password" id="userPassword" placeholder="Enter password"
-                       autocomplete="current-password"
-                       oninput="checkPasswordStrength(this.value, 'loginStrengthFill','loginStrengthLabel')"
-                       onkeydown="if(event.key==='Enter') handleContinue()"/>
-                <button type="button" class="pw-toggle" onclick="togglePwVisibility('userPassword',this)">👁</button>
+            <div class="preview-mini-list">
+              <div class="preview-mini-item">
+                <strong>Verified listings</strong>
+                <span>Clear details before you contact</span>
               </div>
-              <div class="pw-strength-bar"><div class="pw-strength-fill" id="loginStrengthFill"></div></div>
-              <div class="pw-strength-label" id="loginStrengthLabel"></div>
-            </div>
-            <div style="text-align:right;margin-top:-8px;margin-bottom:12px;">
-              <button class="auth-link" onclick="showResetStep()">Forgot password?</button>
-            </div>
-          </div>
-
-          <div id="recaptcha-container"></div>
-          <button class="auth-btn" id="continueBtn" onclick="handleContinue()">Continue →</button>
-
-          <div class="auth-hint" style="margin-top:12px;text-align:center;">
-            New to LedGe? We'll create your account automatically.
-          </div>
-        </div>
-
-        <!-- ── STEP 2: OTP verify ── -->
-        <div id="authStepOTP" class="auth-step">
-          <h3>Verify OTP 🔐</h3>
-          <p class="auth-subtitle" id="otpSentMsg">OTP sent to <strong id="otpPhone"></strong></p>
-          <div class="auth-group">
-            <label>6-Digit OTP</label>
-            <input type="text" id="otpInput" placeholder="——————" maxlength="6"
-                   inputmode="numeric" autocomplete="one-time-code"
-                   oninput="this.value=this.value.replace(/\D/g,'')"
-                   onkeydown="if(event.key==='Enter') verifyOTP()"/>
-          </div>
-          <button class="auth-btn" onclick="verifyOTP()">Verify & Continue →</button>
-          <button class="auth-btn-ghost" onclick="backToStep1()">← Change Number</button>
-          <div class="otp-timer" id="otpTimer"></div>
-          <div class="otp-resend-row" id="resendRow" style="display:none;">
-            <button class="auth-link" onclick="resendOTP()">↺ Resend OTP</button>
-          </div>
-        </div>
-
-        <!-- ── STEP 3: Set / Create Password (after first OTP login) ── -->
-        <div id="authStepSetPw" class="auth-step">
-          <div class="auth-success-icon">🔑</div>
-          <h3>Secure your account</h3>
-          <p class="auth-subtitle">Create a password so you can log in with email next time — no OTP needed!</p>
-
-          <div class="auth-group">
-            <label>New Password</label>
-            <div class="pw-wrap">
-              <input type="password" id="setPwInput" placeholder="At least 8 characters"
-                     oninput="checkPasswordStrength(this.value,'setPwStrengthFill','setPwStrengthLabel')"
-                     onkeydown="if(event.key==='Enter') saveNewPassword()"/>
-              <button type="button" class="pw-toggle" onclick="togglePwVisibility('setPwInput',this)">👁</button>
-            </div>
-            <div class="pw-strength-bar"><div class="pw-strength-fill" id="setPwStrengthFill"></div></div>
-            <div class="pw-strength-label" id="setPwStrengthLabel"></div>
-          </div>
-          <div class="auth-group">
-            <label>Confirm Password</label>
-            <div class="pw-wrap">
-              <input type="password" id="setPwConfirm" placeholder="Repeat password"
-                     onkeydown="if(event.key==='Enter') saveNewPassword()"/>
-              <button type="button" class="pw-toggle" onclick="togglePwVisibility('setPwConfirm',this)">👁</button>
+              <div class="preview-mini-item">
+                <strong>Quick filters</strong>
+                <span>Budget, food, WiFi, and distance</span>
+              </div>
+              <div class="preview-mini-item">
+                <strong>Direct contact</strong>
+                <span>Message owners on WhatsApp</span>
+              </div>
             </div>
           </div>
-          <button class="auth-btn" onclick="saveNewPassword()">🔒 Save Password</button>
-          <button class="auth-btn-ghost" onclick="skipSetPassword()">Skip for now</button>
         </div>
-
-        <!-- ── STEP 4: Password Reset ── -->
-        <div id="authStepReset" class="auth-step">
-          <h3>Reset Password 📧</h3>
-          <p class="auth-subtitle">Enter your email and we'll send a reset link.</p>
-          <div class="auth-group">
-            <label>Email Address</label>
-            <input type="email" id="resetEmail" placeholder="you@example.com"
-                   onkeydown="if(event.key==='Enter') sendPasswordReset()"/>
-          </div>
-          <button class="auth-btn" onclick="sendPasswordReset()">Send Reset Link</button>
-          <button class="auth-btn-ghost" onclick="backToStep1()">← Back to Login</button>
-        </div>
-
-      </div><!-- /auth-card -->
-
-      <!-- Guest panel -->
-      <div class="guest-panel">
-        <h4>Browse as Guest</h4>
-        <div class="guest-perms">
-          ✔ View all listings &nbsp; ✔ Contact owners via WhatsApp<br/>
-          ✔ View full listing details<br/>
-          ✖ Cannot add or manage listings
-        </div>
-        <button class="auth-btn-ghost" onclick="continueAsGuest()" style="margin-top:0;">Browse Without Login</button>
       </div>
 
+      <div class="auth-main-panel">
+        <div class="auth-stack-card brand-card">
+          <div class="auth-logo instagram-inspired-logo">Led<span>Ge</span></div>
+          <p class="auth-tagline">Login to continue browsing, save your account securely, and manage your listings.</p>
+        </div>
+
+        <div class="auth-stack-card auth-card auth-card-clean">
+          <div id="authStep1" class="auth-step show">
+            <div class="auth-title-block">
+              <h3>Sign in</h3>
+              <p class="auth-subtitle">Use phone OTP or email and password.</p>
+            </div>
+
+            <div class="auth-tabs auth-tabs-clean">
+              <button class="auth-tab-btn active" id="tabPhone" onclick="switchAuthMode('phone')">Phone</button>
+              <button class="auth-tab-btn" id="tabEmail" onclick="switchAuthMode('email')">Email</button>
+            </div>
+
+            <div id="phoneFields">
+              <div class="auth-group auth-group-clean">
+                <label>Full name</label>
+                <input type="text" id="userName" placeholder="Enter your full name" autocomplete="name"/>
+              </div>
+              <div class="auth-group auth-group-clean">
+                <label>Phone number</label>
+                <input type="tel" id="userPhone" placeholder="10-digit mobile number"
+                       inputmode="numeric" maxlength="10"
+                       oninput="this.value=this.value.replace(/\D/g,'')"
+                       onkeydown="if(event.key==='Enter') handleContinue()"/>
+              </div>
+              <div class="auth-security-note">OTP keeps your login secure and avoids password reuse.</div>
+            </div>
+
+            <div id="emailFields" style="display:none;">
+              <div class="auth-group auth-group-clean">
+                <label>Email</label>
+                <input type="email" id="userEmail" placeholder="Enter your email"
+                       autocomplete="email"
+                       onkeydown="if(event.key==='Enter') handleContinue()"/>
+              </div>
+              <div class="auth-group auth-group-clean">
+                <label>Password</label>
+                <div class="pw-wrap clean-pw-wrap">
+                  <input type="password" id="userPassword" placeholder="Enter password"
+                         autocomplete="current-password"
+                         oninput="checkPasswordStrength(this.value, 'loginStrengthFill','loginStrengthLabel')"
+                         onkeydown="if(event.key==='Enter') handleContinue()"/>
+                  <button type="button" class="pw-toggle" onclick="togglePwVisibility('userPassword',this)">Show</button>
+                </div>
+                <div class="pw-strength-bar"><div class="pw-strength-fill" id="loginStrengthFill"></div></div>
+                <div class="pw-strength-label" id="loginStrengthLabel"></div>
+              </div>
+              <div class="auth-group auth-group-clean auth-optional-name">
+                <label>Full name for new account</label>
+                <input type="text" id="userNameEmail" placeholder="Only needed if we create a new account" autocomplete="name"/>
+              </div>
+              <div class="auth-inline-actions">
+                <button class="auth-link" onclick="showResetStep()">Forgot password?</button>
+              </div>
+            </div>
+
+            <div id="recaptcha-container"></div>
+            <button class="auth-btn auth-btn-clean" id="continueBtn" onclick="handleContinue()">Continue</button>
+            <div class="auth-footnote">New users can create an account in the same flow.</div>
+          </div>
+
+          <div id="authStepOTP" class="auth-step">
+            <div class="auth-title-block">
+              <h3>Enter OTP</h3>
+              <p class="auth-subtitle" id="otpSentMsg">We sent a code to <strong id="otpPhone"></strong></p>
+            </div>
+            <div class="auth-group auth-group-clean otp-group-clean">
+              <label>Verification code</label>
+              <input type="text" id="otpInput" placeholder="6-digit code" maxlength="6"
+                     inputmode="numeric" autocomplete="one-time-code"
+                     oninput="this.value=this.value.replace(/\D/g,'')"
+                     onkeydown="if(event.key==='Enter') verifyOTP()"/>
+            </div>
+            <button class="auth-btn auth-btn-clean" onclick="verifyOTP()">Verify</button>
+            <button class="auth-btn-ghost auth-btn-ghost-clean" onclick="backToStep1()">Use another number</button>
+            <div class="otp-timer" id="otpTimer"></div>
+            <div class="otp-resend-row" id="resendRow" style="display:none;">
+              <button class="auth-link" onclick="resendOTP()">Resend OTP</button>
+            </div>
+          </div>
+
+          <div id="authStepSetPw" class="auth-step">
+            <div class="auth-title-block">
+              <h3>Secure your account</h3>
+              <p class="auth-subtitle">Add a password so you can log in faster next time.</p>
+            </div>
+            <div class="auth-group auth-group-clean">
+              <label>New password</label>
+              <div class="pw-wrap clean-pw-wrap">
+                <input type="password" id="setPwInput" placeholder="At least 8 characters"
+                       oninput="checkPasswordStrength(this.value,'setPwStrengthFill','setPwStrengthLabel')"
+                       onkeydown="if(event.key==='Enter') saveNewPassword()"/>
+                <button type="button" class="pw-toggle" onclick="togglePwVisibility('setPwInput',this)">Show</button>
+              </div>
+              <div class="pw-strength-bar"><div class="pw-strength-fill" id="setPwStrengthFill"></div></div>
+              <div class="pw-strength-label" id="setPwStrengthLabel"></div>
+            </div>
+            <div class="auth-group auth-group-clean">
+              <label>Confirm password</label>
+              <div class="pw-wrap clean-pw-wrap">
+                <input type="password" id="setPwConfirm" placeholder="Repeat password"
+                       onkeydown="if(event.key==='Enter') saveNewPassword()"/>
+                <button type="button" class="pw-toggle" onclick="togglePwVisibility('setPwConfirm',this)">Show</button>
+              </div>
+            </div>
+            <button class="auth-btn auth-btn-clean" onclick="saveNewPassword()">Save password</button>
+            <button class="auth-btn-ghost auth-btn-ghost-clean" onclick="skipSetPassword()">Skip for now</button>
+          </div>
+
+          <div id="authStepReset" class="auth-step">
+            <div class="auth-title-block">
+              <h3>Reset password</h3>
+              <p class="auth-subtitle">Enter your email and we’ll send a reset link.</p>
+            </div>
+            <div class="auth-group auth-group-clean">
+              <label>Email</label>
+              <input type="email" id="resetEmail" placeholder="Enter your email"
+                     onkeydown="if(event.key==='Enter') sendPasswordReset()"/>
+            </div>
+            <button class="auth-btn auth-btn-clean" onclick="sendPasswordReset()">Send reset link</button>
+            <button class="auth-btn-ghost auth-btn-ghost-clean" onclick="backToStep1()">Back to login</button>
+          </div>
+        </div>
+
+        <div class="auth-stack-card guest-card-clean">
+          <p class="guest-card-title">Just exploring?</p>
+          <p class="guest-card-copy">Browse listings first and sign in only when you want to list or manage a property.</p>
+          <button class="auth-btn-ghost auth-btn-ghost-clean guest-btn-clean" onclick="continueAsGuest()">Continue as guest</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -775,6 +1120,7 @@
   <script type="module" src="ledge.js"></script>
 </body>
 </html>
+
 
 
 

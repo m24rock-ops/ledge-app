@@ -330,11 +330,11 @@ function skipSetPassword() {
 //  EMAIL LOGIN / REGISTER
 // ════════════════════════════════════════════════════════
 async function loginWithEmail() {
-  const name     = document.getElementById('userName').value.trim();
-  const email    = document.getElementById('userEmail').value.trim();
+  const fallbackName = document.getElementById('userName')?.value.trim() || '';
+  const name = document.getElementById('userNameEmail')?.value.trim() || fallbackName;
+  const email = document.getElementById('userEmail').value.trim();
   const password = document.getElementById('userPassword').value;
 
-  if (!name)     { toast('Please enter your name', 'error');    return; }
   if (!email)    { toast('Please enter your email', 'error');   return; }
   if (!password) { toast('Please enter a password', 'error');   return; }
 
@@ -352,14 +352,13 @@ async function loginWithEmail() {
   btn.disabled    = true;
 
   try {
-    // Try sign in first
     const userCred = await signInWithEmailAndPassword(auth, email, password);
-    const user     = userCred.user;
+    const user = userCred.user;
 
     currentUser = {
-      name:  name || user.email.split('@')[0],
+      name: name || user.displayName || user.email.split('@')[0],
       phone: '',
-      uid:   user.uid
+      uid: user.uid
     };
     localStorage.setItem('ledgeUser', JSON.stringify(currentUser));
     isGuest = false;
@@ -368,11 +367,17 @@ async function loginWithEmail() {
 
   } catch (err) {
     if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-      // Auto register new user
+      if (!name) {
+        toast('Add your full name to create a new account', 'error');
+        btn.textContent = 'Continue';
+        btn.disabled = false;
+        return;
+      }
+
       try {
         const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        const user     = userCred.user;
-        currentUser    = { name, phone: '', uid: user.uid };
+        const user = userCred.user;
+        currentUser = { name, phone: '', uid: user.uid };
         localStorage.setItem('ledgeUser', JSON.stringify(currentUser));
         isGuest = false;
         showApp(name);
@@ -391,7 +396,7 @@ async function loginWithEmail() {
       toast(err.message, 'error');
     }
   } finally {
-    btn.textContent = 'Continue →';
+    btn.textContent = 'Continue';
     btn.disabled    = false;
   }
 }
@@ -1282,6 +1287,7 @@ window.addEventListener('resize', syncFilterPanelForViewport);
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeFilters(); });
 init();
 syncFilterPanelForViewport();
+
 
 
 
