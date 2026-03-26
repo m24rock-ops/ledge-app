@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -351,8 +351,8 @@
 
   <!-- DETAIL MODAL -->
   <div class="modal-overlay" id="detailModal" onclick="closeDetailModal()">
-    <div class="modal" style="max-width:500px;max-height:90vh;overflow-y:auto;position:relative;" onclick="event.stopPropagation()">
-      <button onclick="closeDetailModal()" style="position:absolute;top:14px;right:16px;background:transparent;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);line-height:1;">✕</button>
+    <div class="modal detail-modal" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeDetailModal()" aria-label="Close details">✕</button>
       <div id="detailModalBody"></div>
     </div>
   </div>
@@ -522,6 +522,27 @@
   ════════════════════════════════════════════ -->
   <div id="mainApp" style="display:none;">
     <div class="container">
+      <section class="app-hero">
+        <div class="hero-copy">
+          <span class="eyebrow">Smarter PG discovery</span>
+          <h1>Find a stay that matches your budget, area, and vibe.</h1>
+          <p>Browse verified listings, compare options quickly, and contact owners without leaving the app.</p>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-value" id="statTotal">0</span>
+            <span class="stat-label">Total listings</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statAvailable">0</span>
+            <span class="stat-label">Available now</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statLocations">0</span>
+            <span class="stat-label">Locations</span>
+          </div>
+        </div>
+      </section>
 
       <!-- Tabs -->
       <div class="tabs">
@@ -531,48 +552,117 @@
 
       <!-- ── BROWSE ─────────────────────────── -->
       <div id="browseSection">
-        <div class="form-group" style="margin-bottom:12px;">
-          <input type="text" id="searchInput"
-            placeholder="🔍  Search by area, name, amenities..."
-            oninput="debouncedSearch()" style="font-size:0.92rem;"/>
-        </div>
+        <div class="browse-layout" id="browseLayout">
+          <div class="filters-backdrop" id="filtersBackdrop" onclick="closeFilters()"></div>
+          <aside class="filters-card" id="filtersCard">
+            <div class="section-card-head">
+              <button class="filters-close-btn" onclick="closeFilters()" aria-label="Close filters">✕</button>
+              <div>
+                <span class="eyebrow">Filters</span>
+                <h2>Find the right PG faster</h2>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="clearAllFilters()">Reset</button>
+            </div>
 
-        <div class="filter-bar" style="flex-wrap:wrap;gap:10px;">
-          <select id="filterType" onchange="loadPGs()">
-            <option value="all">All Types</option>
-            <option value="PG">PG</option>
-            <option value="Hostel">Hostel</option>
-            <option value="Apartment">Apartment</option>
-            <option value="Room">Single Room</option>
-          </select>
-          <select id="filterGender" onchange="loadPGs()">
-            <option value="all">All Genders</option>
-            <option value="Boys">Boys</option>
-            <option value="Girls">Girls</option>
-            <option value="Unisex">Unisex</option>
-          </select>
-          <select id="filterAvail" onchange="loadPGs()">
-            <option value="all">All Availability</option>
-            <option value="available">🟢 Available</option>
-            <option value="unavailable">🔴 Filled</option>
-          </select>
-          <div class="location-filter-wrap">
-            <input type="text" id="locationSearch" placeholder="📍 Type area..."
-                   oninput="filterLocationDropdown()"/>
-            <select id="filterLocation" onchange="loadPGs()">
-              <option value="all">All Locations</option>
-            </select>
-          </div>
-          <div class="rent-filter-wrap">
-            <label for="filterMaxRent">Max ₹</label>
-            <input type="number" id="filterMaxRent" placeholder="e.g. 15000"
-                   min="0" step="500" oninput="debouncedSearch()"/>
-          </div>
-          <button class="btn btn-secondary btn-sm" onclick="loadPGs()">↻ Refresh</button>
-        </div>
+            <div class="filter-stack">
+              <div class="filter-group-block">
+                <label for="filterBudget">Budget</label>
+                <select id="filterBudget" onchange="loadPGs()">
+                  <option value="all">Any budget</option>
+                  <option value="3000-8000">₹3000 – ₹8000</option>
+                  <option value="8000-12000">₹8000 – ₹12000</option>
+                  <option value="12000-20000">₹12000 – ₹20000</option>
+                </select>
+              </div>
 
-        <div class="results-meta" id="resultsMeta"></div>
-        <div id="pgList"></div>
+              <div class="filter-group-block">
+                <label for="filterGender">For</label>
+                <select id="filterGender" onchange="loadPGs()">
+                  <option value="all">Boys / Girls / Everyone</option>
+                  <option value="Boys">Boys</option>
+                  <option value="Girls">Girls</option>
+                  <option value="Unisex">Unisex</option>
+                </select>
+              </div>
+
+              <div class="filter-group-block">
+                <label for="filterType">Property type</label>
+                <select id="filterType" onchange="loadPGs()">
+                  <option value="all">All types</option>
+                  <option value="PG">PG</option>
+                  <option value="Hostel">Hostel</option>
+                  <option value="Apartment">Apartment</option>
+                  <option value="Room">Single Room</option>
+                </select>
+              </div>
+
+              <div class="filter-group-block">
+                <label for="filterAvail">Availability</label>
+                <select id="filterAvail" onchange="loadPGs()">
+                  <option value="all">All listings</option>
+                  <option value="available">Available now</option>
+                  <option value="unavailable">Filled</option>
+                </select>
+              </div>
+
+              <div class="filter-group-block">
+                <label for="filterDistance">Distance from college</label>
+                <select id="filterDistance" onchange="loadPGs()">
+                  <option value="all">Any distance</option>
+                  <option value="1">Within 1 km</option>
+                  <option value="3">Within 3 km</option>
+                  <option value="5">Within 5 km</option>
+                </select>
+              </div>
+
+              <div class="filter-group-block">
+                <label>Must have</label>
+                <label class="check-row"><input type="checkbox" id="filterFood" onchange="loadPGs()"/> Food included 🍛</label>
+                <label class="check-row"><input type="checkbox" id="filterWifi" onchange="loadPGs()"/> WiFi 📶</label>
+              </div>
+
+              <div class="filter-group-block">
+                <label for="locationSearch">Location</label>
+                <input type="text" id="locationSearch" placeholder="Type area..." oninput="filterLocationDropdown()"/>
+                <select id="filterLocation" onchange="loadPGs()">
+                  <option value="all">All locations</option>
+                </select>
+              </div>
+            </div>
+          </aside>
+
+          <div class="results-column">
+            <div class="results-topbar">
+              <div class="topbar-actions compact-panel">
+                <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilters()">☰ Filters</button>
+                <span class="topbar-note">Open filters only when you need them</span>
+              </div>
+
+              <div class="search-panel compact-panel">
+                <label for="searchInput">Search</label>
+                <input type="text" id="searchInput"
+                  placeholder="Search by area, property name, amenities..."
+                  oninput="debouncedSearch()"/>
+              </div>
+
+              <div class="sort-card compact-panel">
+                <label for="sortBy">Sort by</label>
+                <select id="sortBy" onchange="loadPGs()">
+                  <option value="newest">Newest first</option>
+                  <option value="price-low">Budget low to high</option>
+                  <option value="price-high">Budget high to low</option>
+                  <option value="distance-near">Nearest to college</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="results-summary">
+              <div class="results-meta" id="resultsMeta"></div>
+              <div class="results-pills" id="resultsPills"></div>
+            </div>
+            <div id="pgList"></div>
+          </div>
+        </div>
       </div>
 
       <!-- ── ADD / EDIT ──────────────────────── -->
@@ -636,9 +726,31 @@
               <label>Location / Address *</label>
               <input type="text" id="pgLocation" placeholder="e.g. Koramangala, Bangalore"/>
             </div>
-            <div class="form-group">
-              <label>Amenities</label>
-              <input type="text" id="pgAmenities" placeholder="WiFi, AC, Food, Laundry..."/>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Food Included *</label>
+                <select id="pgFoodIncluded">
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>WiFi Available *</label>
+                <select id="pgWifi">
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Distance From College (km) *</label>
+                <input type="number" id="pgDistance" min="0" max="50" step="0.1" placeholder="e.g. 1.5"/>
+              </div>
+              <div class="form-group">
+                <label>Amenities</label>
+                <input type="text" id="pgAmenities" placeholder="Laundry, AC, Parking..."/>
+              </div>
             </div>
             <div class="form-group">
               <label>Description</label>
@@ -665,3 +777,9 @@
   <script type="module" src="ledge.js"></script>
 </body>
 </html>
+
+
+
+
+
+

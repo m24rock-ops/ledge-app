@@ -1,4 +1,4 @@
-// ══════════════════════════════════════════
+﻿// ══════════════════════════════════════════
 //  LEDGE – ledge.js  (ES Module)  v2.0
 //  FIXES + NEW FEATURES:
 //  • Correct element IDs used throughout
@@ -594,10 +594,151 @@ function debouncedSearch() {
   searchDebounce = setTimeout(loadPGs, 300);
 }
 
+function getPriceValue(pg) {
+  const value = parseInt(pg.price, 10);
+  return Number.isFinite(value) ? value : Number.MAX_SAFE_INTEGER;
+}
+
+function getDistanceValue(pg) {
+  const value = parseFloat(pg.distanceFromCollege);
+  return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
+}
+
+function hasFoodIncluded(pg) {
+  if (typeof pg.foodIncluded === 'boolean') return pg.foodIncluded;
+  const haystack = [pg.amenities, pg.description].filter(Boolean).join(' ').toLowerCase();
+  return /food|meal|mess/.test(haystack);
+}
+
+function hasWifi(pg) {
+  if (typeof pg.wifiAvailable === 'boolean') return pg.wifiAvailable;
+  const haystack = [pg.amenities, pg.description].filter(Boolean).join(' ').toLowerCase();
+  return /wifi|wi-fi|internet|broadband/.test(haystack);
+}
+
+function parseBudgetRange(range) {
+  if (!range || range === 'all') return null;
+  const [min, max] = range.split('-').map(Number);
+  return Number.isFinite(min) && Number.isFinite(max) ? { min, max } : null;
+}
+function updateMarketplaceStats(total, available, locations) {
+  const totalEl = document.getElementById('statTotal');
+  const availableEl = document.getElementById('statAvailable');
+  const locationsEl = document.getElementById('statLocations');
+
+  if (totalEl) totalEl.textContent = String(total);
+  if (availableEl) availableEl.textContent = String(available);
+  if (locationsEl) locationsEl.textContent = String(locations);
+}
+
+function setResultsSummary(displayed, total, available, locations) {
+  const resultsMeta = document.getElementById('resultsMeta');
+  const resultsPills = document.getElementById('resultsPills');
+
+  if (resultsMeta) {
+    if (!total) {
+      resultsMeta.textContent = 'No listings yet. Be the first to add one.';
+    } else if (displayed === total) {
+      resultsMeta.textContent = `Showing all ${total} listing${total !== 1 ? 's' : ''}`;
+    } else {
+      resultsMeta.textContent = `Showing ${displayed} of ${total} listing${total !== 1 ? 's' : ''}`;
+    }
+  }
+
+  if (resultsPills) {
+    resultsPills.innerHTML = [
+      `<span class="results-pill">${available} available now</span>`,
+      `<span class="results-pill">${locations} locations</span>`
+    ].join('');
+  }
+}
+
+function syncQuickFilters() {
+  const filterType = document.getElementById('filterType')?.value || 'all';
+  const filterAvail = document.getElementById('filterAvail')?.value || 'all';
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    const group = chip.dataset.filterGroup;
+    const value = chip.dataset.filterValue;
+    const isActive = (group === 'type' && value === filterType) ||
+      (group === 'availability' && value === filterAvail) ||
+      (group === 'type' && value === 'all' && filterType === 'all' && filterAvail === 'all');
+
+    chip.classList.toggle('active', isActive);
+  });
+}
+
+function applyQuickFilter(event) {
+  const chip = event.currentTarget;
+  const group = chip.dataset.filterGroup;
+  const value = chip.dataset.filterValue;
+
+  if (group === 'type') {
+    document.getElementById('filterType').value = value;
+    if (value === 'all') {
+      document.getElementById('filterAvail').value = 'all';
+    }
+  }
+
+  if (group === 'availability') {
+    const current = document.getElementById('filterAvail').value;
+    document.getElementById('filterAvail').value = current === value ? 'all' : value;
+  }
+
+  loadPGs();
+}
+
+function setFiltersOpen(open) {
+  const layout = document.getElementById('browseLayout');
+  const toggleBtn = document.getElementById('filterToggleBtn');
+  if (!layout) return;
+
+  layout.classList.toggle('filters-open', open);
+  if (toggleBtn) {
+    toggleBtn.textContent = open ? '✕ Close Filters' : '☰ Filters';
+    toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  document.body.classList.toggle('filters-panel-open', open && window.innerWidth <= 960);
+}
+
+function toggleFilters() {
+  const layout = document.getElementById('browseLayout');
+  if (!layout) return;
+  setFiltersOpen(!layout.classList.contains('filters-open'));
+}
+
+function closeFilters() {
+  setFiltersOpen(false);
+}
+
+function syncFilterPanelForViewport() {
+  closeFilters();
+}
+function clearAllFilters() {
+  const ids = ['searchInput', 'locationSearch'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  document.getElementById('filterType').value = 'all';
+  document.getElementById('filterGender').value = 'all';
+  document.getElementById('filterAvail').value = 'all';
+  document.getElementById('filterLocation').value = 'all';
+  document.getElementById('filterBudget').value = 'all';
+  document.getElementById('filterDistance').value = 'all';
+  document.getElementById('sortBy').value = 'newest';
+  document.getElementById('filterFood').checked = false;
+  document.getElementById('filterWifi').checked = false;
+  if (window.innerWidth <= 960) closeFilters();
+  loadPGs();
+}
+
 // ════════════════════════════════════════════════════════
 //  SHOW SECTION
 // ════════════════════════════════════════════════════════
 function showSection(section) {
+  closeFilters();
   document.getElementById('browseSection').style.display = 'none';
   document.getElementById('addSection').style.display    = 'none';
   document.getElementById('tab-browse').classList.remove('active');
@@ -622,6 +763,10 @@ function showSection(section) {
       document.getElementById('guestNotice').style.display         = 'flex';
       document.getElementById('addFormContent').style.opacity       = '0.4';
       document.getElementById('addFormContent').style.pointerEvents = 'none';
+    } else {
+      document.getElementById('guestNotice').style.display         = 'none';
+      document.getElementById('addFormContent').style.opacity       = '1';
+      document.getElementById('addFormContent').style.pointerEvents = 'auto';
     }
   }
 }
@@ -633,121 +778,169 @@ async function loadPGs() {
   const listEl = document.getElementById('pgList');
   if (!listEl) return;
   listEl.innerHTML = '<div class="spinner"></div>';
-  document.getElementById('resultsMeta').textContent = '';
+  setResultsSummary(0, 0, 0, 0);
 
   try {
     const snap = await getDocs(query(collection(db, 'pgs'), orderBy('createdAt', 'desc')));
+    const docs = snap.docs.map(docSnap => ({ id: docSnap.id, pg: docSnap.data() }));
 
-    const filterType     = document.getElementById('filterType')?.value     || 'all';
-    const filterGender   = document.getElementById('filterGender')?.value   || 'all';
+    const filterType = document.getElementById('filterType')?.value || 'all';
+    const filterGender = document.getElementById('filterGender')?.value || 'all';
     const filterLocation = document.getElementById('filterLocation')?.value || 'all';
-    const filterAvail    = document.getElementById('filterAvail')?.value    || 'all';
-    const searchQuery    = (document.getElementById('searchInput')?.value   || '').toLowerCase().trim();
-    const maxRentVal     = parseInt(document.getElementById('filterMaxRent')?.value || '0', 10);
+    const filterAvail = document.getElementById('filterAvail')?.value || 'all';
+    const filterBudget = document.getElementById('filterBudget')?.value || 'all';
+    const filterDistance = document.getElementById('filterDistance')?.value || 'all';
+    const filterFood = !!document.getElementById('filterFood')?.checked;
+    const filterWifi = !!document.getElementById('filterWifi')?.checked;
+    const sortBy = document.getElementById('sortBy')?.value || 'newest';
+    const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+    const budgetRange = parseBudgetRange(filterBudget);
+    const maxDistance = filterDistance === 'all' ? null : Number(filterDistance);
 
-    if (snap.empty) {
-      listEl.innerHTML = emptyState('🏠', 'No listings yet', 'Be the first to add a PG!');
+    const totalListings = docs.length;
+    const availableCount = docs.filter(({ pg }) => pg.available !== false).length;
+    const locationCount = new Set(
+      docs.map(({ pg }) => (pg.location || '').split(',')[0].trim()).filter(Boolean)
+    ).size;
+
+    updateMarketplaceStats(totalListings, availableCount, locationCount);
+
+    if (!totalListings) {
+      setResultsSummary(0, 0, 0, 0);
+      listEl.innerHTML = emptyState('🏠', 'No listings yet', 'Be the first to add a PG.');
       return;
     }
 
-    // Rebuild location list
-    const locSet = new Set();
-    snap.forEach(d => { const l = d.data().location; if (l) locSet.add(l.split(',')[0].trim()); });
-    allLocationOptions = [...locSet].sort();
+    allLocationOptions = [...new Set(
+      docs.map(({ pg }) => (pg.location || '').split(',')[0].trim()).filter(Boolean)
+    )].sort();
 
     const locSearch = (document.getElementById('locationSearch')?.value || '').toLowerCase().trim();
     const locSelect = document.getElementById('filterLocation');
     if (locSelect) {
-      const curVal   = locSelect.value;
-      const filtered = locSearch
+      const currentValue = locSelect.value;
+      const filteredLocations = locSearch
         ? allLocationOptions.filter(l => l.toLowerCase().includes(locSearch))
         : allLocationOptions;
-      locSelect.innerHTML = '<option value="all">All Locations</option>' +
-        filtered.map(l => `<option value="${l}"${curVal === l ? ' selected' : ''}>${esc(l)}</option>`).join('');
+
+      locSelect.innerHTML = '<option value="all">All locations</option>' +
+        filteredLocations.map(l => `<option value="${esc(l)}"${currentValue === l ? ' selected' : ''}>${esc(l)}</option>`).join('');
+
+      if (currentValue !== 'all' && !filteredLocations.includes(currentValue)) {
+        locSelect.value = 'all';
+      }
     }
 
-    const cards = [];
+    const filteredDocs = docs.filter(({ pg }) => {
+      if (filterType !== 'all' && pg.propertyType !== filterType) return false;
+      if (filterGender !== 'all' && pg.gender !== filterGender) return false;
 
-    snap.forEach(docSnap => {
-      const pg = docSnap.data();
+      const isAvailable = pg.available !== false;
+      if (filterAvail === 'available' && !isAvailable) return false;
+      if (filterAvail === 'unavailable' && isAvailable) return false;
 
-      if (filterType   !== 'all' && pg.propertyType !== filterType)   return;
-      if (filterGender !== 'all' && pg.gender       !== filterGender) return;
+      const primaryLocation = (pg.location || '').split(',')[0].trim();
+      if (filterLocation !== 'all' && primaryLocation !== filterLocation) return false;
 
-      const pgAvail = pg.available !== false;
-      if (filterAvail === 'available'   && !pgAvail) return;
-      if (filterAvail === 'unavailable' && pgAvail)  return;
+      const priceValue = getPriceValue(pg);
+      if (budgetRange && (priceValue < budgetRange.min || priceValue > budgetRange.max)) return false;
 
-      if (filterLocation !== 'all') {
-        if ((pg.location || '').split(',')[0].trim() !== filterLocation) return;
-      }
+      const distanceValue = getDistanceValue(pg);
+      if (maxDistance !== null && distanceValue > maxDistance) return false;
 
-      if (maxRentVal > 0 && parseInt(pg.price, 10) > maxRentVal) return;
+      if (filterFood && !hasFoodIncluded(pg)) return false;
+      if (filterWifi && !hasWifi(pg)) return false;
 
       if (searchQuery) {
-        const hay = [pg.name, pg.location, pg.amenities, pg.description, pg.type]
-          .filter(Boolean).join(' ').toLowerCase();
-        if (!hay.includes(searchQuery)) return;
+        const haystack = [
+          pg.name,
+          pg.location,
+          pg.amenities,
+          pg.description,
+          pg.type,
+          pg.propertyType,
+          hasFoodIncluded(pg) ? 'food included' : '',
+          hasWifi(pg) ? 'wifi internet' : ''
+        ].filter(Boolean).join(' ').toLowerCase();
+
+        if (!haystack.includes(searchQuery)) return false;
       }
 
+      return true;
+    });
+
+    if (!filteredDocs.length) {
+      setResultsSummary(0, totalListings, availableCount, locationCount);
+      listEl.innerHTML = emptyState('🔎', 'No matches', 'Try adjusting the filters or search term.');
+      return;
+    }
+
+    filteredDocs.sort((a, b) => {
+      if (sortBy === 'price-low') return getPriceValue(a.pg) - getPriceValue(b.pg);
+      if (sortBy === 'price-high') return getPriceValue(b.pg) - getPriceValue(a.pg);
+      if (sortBy === 'distance-near') return getDistanceValue(a.pg) - getDistanceValue(b.pg);
+      return (b.pg.createdAt || 0) - (a.pg.createdAt || 0);
+    });
+
+    const cards = filteredDocs.map(({ id, pg }) => {
       const isOwner = !!(currentUser?.uid && pg.ownerId === currentUser.uid);
-
-      const availBadge = pgAvail
-        ? `<div class="avail-badge available">🟢 Available</div>`
-        : `<div class="avail-badge unavailable">🔴 Filled</div>`;
-
-      const ownerBadge = isOwner ? `<div class="owner-badge">✏️ Your listing</div>` : '';
+      const isAvailable = pg.available !== false;
+      const ownerBadge = isOwner ? '<div class="owner-badge">Your listing</div>' : '';
+      const foodIncluded = hasFoodIncluded(pg);
+      const wifiAvailable = hasWifi(pg);
+      const distanceValue = getDistanceValue(pg);
+      const distanceText = Number.isFinite(distanceValue) ? `${distanceValue.toFixed(1)} km from college` : 'Distance not shared';
 
       const actionBtns = isOwner ? `
-        <button class="btn btn-secondary btn-sm edit-btn"  data-id="${docSnap.id}">✏️ Edit</button>
-        <button class="btn btn-danger   btn-sm delete-btn" data-id="${docSnap.id}">🗑 Delete</button>
-        <button class="btn ${pgAvail ? 'btn-secondary' : 'btn-primary'} btn-sm toggle-avail-btn"
-                data-id="${docSnap.id}" data-avail="${pgAvail}">
-          ${pgAvail ? '🔴 Mark Filled' : '✅ Mark Available'}
+        <button class="btn btn-secondary btn-sm edit-btn" data-id="${id}">Edit</button>
+        <button class="btn btn-danger btn-sm delete-btn" data-id="${id}">Delete</button>
+        <button class="btn ${isAvailable ? 'btn-secondary' : 'btn-primary'} btn-sm toggle-avail-btn"
+                data-id="${id}" data-avail="${isAvailable}">
+          ${isAvailable ? 'Mark Filled' : 'Mark Available'}
         </button>` : '';
-
       const imgHtml = pg.imageUrl
         ? `<img class="pg-card-img" src="${esc(pg.imageUrl)}" alt="Photo" loading="lazy"/>`
-        : `<div class="pg-card-img-placeholder">🏘️</div>`;
+        : '<div class="pg-card-img-placeholder">🏘️</div>';
+      const pgAttr = encodeURIComponent(JSON.stringify({ ...pg, id }));
 
-      const pgAttr = encodeURIComponent(JSON.stringify({ ...pg, id: docSnap.id }));
-
-      cards.push(`
-        <div class="pg-card${pgAvail ? '' : ' pg-card-unavailable'}">
+      return `
+        <div class="pg-card${isAvailable ? '' : ' pg-card-unavailable'}">
           <div class="pg-card-clickable" data-pg="${pgAttr}" style="cursor:pointer;">
             ${imgHtml}
             <div class="pg-card-body">
-              ${ownerBadge}${availBadge}
+              ${ownerBadge}
               <div class="pg-card-header">
-                <div class="pg-card-title">${esc(pg.name)}</div>
+                <div>
+                  <div class="pg-card-title">${esc(pg.name)}</div>
+                  <div class="avail-badge ${isAvailable ? 'available' : 'unavailable'}">${isAvailable ? 'Available' : 'Filled'}</div>
+                </div>
                 <div class="pg-type-badge">${esc(pg.propertyType || 'PG')}</div>
               </div>
-              ${pg.description ? `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;line-height:1.5;">${esc(pg.description)}</p>` : ''}
+              ${pg.description ? `<p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px;line-height:1.6;">${esc(pg.description)}</p>` : ''}
               <div class="pg-meta">
                 <div class="pg-meta-item">📍 <span>${esc(pg.location)}</span></div>
-                <div class="pg-meta-item">👥 <span>${esc(pg.gender || 'Unisex')} &bull; ${esc(pg.type)}</span></div>
+                <div class="pg-meta-item">👥 <span>${esc(pg.gender || 'Unisex')} • ${esc(pg.type)}</span></div>
                 <div class="pg-meta-item">💰 <strong class="pg-price">₹${esc(String(pg.price))}/mo</strong></div>
+                <div class="pg-meta-item">🎓 <span>${esc(distanceText)}</span></div>
                 <div class="pg-meta-item">📞 <span>${esc(pg.contact)}</span></div>
-                ${pg.amenities ? `<div class="pg-meta-item">✨ <span>${esc(pg.amenities)}</span></div>` : ''}
+              </div>
+              <div class="result-feature-badges">
+                <span class="feature-badge">${foodIncluded ? '🍛 Food included' : '🍛 No food'}</span>
+                <span class="feature-badge">${wifiAvailable ? '📶 WiFi' : '📶 No WiFi'}</span>
               </div>
             </div>
           </div>
-          <div class="pg-card-footer" style="padding:0 16px 16px;display:flex;flex-wrap:wrap;gap:8px;">
-            <a href="https://wa.me/91${esc(pg.contact)}" target="_blank" rel="noopener" class="btn btn-whatsapp">💬 WhatsApp</a>
+          <div class="pg-card-footer">
+            <a href="https://wa.me/91${esc(pg.contact)}" target="_blank" rel="noopener" class="btn btn-whatsapp">WhatsApp</a>
             ${actionBtns}
           </div>
-        </div>`);
+        </div>`;
     });
 
-    if (cards.length === 0) {
-      listEl.innerHTML = emptyState('🔍', 'No matches', 'Try adjusting the filters or search term.');
-    } else {
-      document.getElementById('resultsMeta').textContent =
-        `${cards.length} listing${cards.length !== 1 ? 's' : ''} found`;
-      listEl.innerHTML = `<div class="pg-grid">${cards.join('')}</div>`;
-      attachCardListeners(listEl);
-    }
-
+    setResultsSummary(filteredDocs.length, totalListings, availableCount, locationCount);
+    listEl.innerHTML = `<div class="pg-grid">${cards.join('')}</div>`;
+    attachCardListeners(listEl);
+    if (window.innerWidth <= 960) closeFilters();
   } catch (err) {
     console.error(err);
     listEl.innerHTML = emptyState('⚠️', 'Failed to load', err.message);
@@ -804,63 +997,57 @@ async function toggleAvailability(id, currentlyAvailable) {
 //  DETAIL MODAL
 // ════════════════════════════════════════════════════════
 function openDetailModal(pg) {
-  const pgAvail = pg.available !== false;
-
+  const isAvailable = pg.available !== false;
   const imgHtml = pg.imageUrl
-    ? `<img src="${esc(pg.imageUrl)}" alt="Photo" style="width:100%;height:220px;object-fit:cover;border-radius:10px;margin-bottom:18px;" loading="lazy"/>`
-    : `<div style="width:100%;height:160px;background:linear-gradient(135deg,var(--bg),var(--border));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:18px;">🏘️</div>`;
+    ? `<img class="detail-media" src="${esc(pg.imageUrl)}" alt="Photo" loading="lazy"/>`
+    : '<div class="detail-media-placeholder">🏘️</div>';
 
   const amenitiesList = pg.amenities
-    ? pg.amenities.split(',').map(a =>
-        `<span style="display:inline-block;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:0.78rem;margin:3px;">${esc(a.trim())}</span>`
-      ).join('')
+    ? pg.amenities.split(',').map(item => `<span class="amenity-pill">${esc(item.trim())}</span>`).join('')
     : '<span style="color:var(--muted);font-size:0.82rem;">Not specified</span>';
 
-  const availTag = pgAvail
-    ? `<span style="background:#efffef;color:#1a7c3e;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:600;border:1px solid #a8e6b8;">🟢 Available</span>`
-    : `<span style="background:#fff0f0;color:#c0392b;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:600;border:1px solid #f5b7b1;">🔴 Filled</span>`;
+  const distanceValue = getDistanceValue(pg);
+  const distanceText = Number.isFinite(distanceValue) ? `${distanceValue.toFixed(1)} km` : 'Not shared';
 
   document.getElementById('detailModalBody').innerHTML = `
-    ${imgHtml}
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-      <h3 style="font-size:1.3rem;font-weight:800;">${esc(pg.name)}</h3>
-      <div class="pg-type-badge">${esc(pg.propertyType || 'PG')}</div>
+    <div class="detail-shell">
+      ${imgHtml}
+      <div class="detail-head">
+        <div>
+          <h3 style="font-size:1.4rem;font-weight:800;margin-bottom:8px;">${esc(pg.name)}</h3>
+          <div class="avail-badge ${isAvailable ? 'available' : 'unavailable'}">${isAvailable ? 'Available now' : 'Currently filled'}</div>
+        </div>
+        <div class="pg-type-badge">${esc(pg.propertyType || 'PG')}</div>
+      </div>
+      <div class="detail-price"><strong>₹${esc(String(pg.price))}</strong><span>per month</span></div>
+      <div class="detail-grid">
+        ${infoBox('Location', pg.location)}
+        ${infoBox('For', pg.gender || 'Unisex')}
+        ${infoBox('Room type', pg.type)}
+        ${infoBox('Distance from college', distanceText)}
+        ${infoBox('Food included', hasFoodIncluded(pg) ? 'Yes' : 'No')}
+        ${infoBox('WiFi', hasWifi(pg) ? 'Yes' : 'No')}
+      </div>
+      ${pg.description ? `
+        <div class="detail-section">
+          <h4>About this place</h4>
+          <p style="font-size:0.92rem;line-height:1.7;color:var(--text);">${esc(pg.description)}</p>
+        </div>` : ''}
+      <div class="detail-section">
+        <h4>Amenities</h4>
+        <div class="amenities-list">${amenitiesList}</div>
+      </div>
+      <a href="https://wa.me/91${esc(pg.contact)}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-full">Contact on WhatsApp</a>
+      <div class="detail-footer-note">Listed by ${esc(pg.ownerName || 'Owner')}</div>
     </div>
-    <div style="margin-bottom:12px;">${availTag}</div>
-    <div style="font-size:1.5rem;font-weight:800;color:var(--accent);margin-bottom:14px;">
-      ₹${esc(String(pg.price))}<span style="font-size:0.9rem;font-weight:400;color:var(--muted);">/month</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-      ${infoBox('Location','📍',pg.location)}
-      ${infoBox('Gender','👥',pg.gender||'Unisex')}
-      ${infoBox('Room Type','🛏',pg.type)}
-      ${infoBox('Contact','📞',pg.contact)}
-    </div>
-    ${pg.description ? `
-    <div style="margin-bottom:16px;">
-      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">About this place</div>
-      <p style="font-size:0.88rem;line-height:1.6;color:var(--text);">${esc(pg.description)}</p>
-    </div>` : ''}
-    <div style="margin-bottom:20px;">
-      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Amenities</div>
-      <div>${amenitiesList}</div>
-    </div>
-    <div style="display:flex;gap:10px;">
-      <a href="https://wa.me/91${esc(pg.contact)}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-full">💬 Contact on WhatsApp</a>
-    </div>
-    <div style="font-size:0.75rem;color:var(--muted);text-align:center;margin-top:14px;">Listed by ${esc(pg.ownerName || 'Owner')}</div>
   `;
 
   document.getElementById('detailModal').classList.add('open');
 }
 
-function infoBox(label, icon, value) {
-  return `<div style="background:var(--surface);border-radius:8px;padding:12px;">
-    <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">${label}</div>
-    <div style="font-size:0.88rem;font-weight:600;">${icon} ${esc(value)}</div>
-  </div>`;
+function infoBox(label, value) {
+  return `<div class="detail-info-box"><strong>${esc(label)}</strong><span>${esc(value)}</span></div>`;
 }
-
 function closeDetailModal() {
   document.getElementById('detailModal').classList.remove('open');
 }
@@ -870,19 +1057,22 @@ function closeDetailModal() {
 // ════════════════════════════════════════════════════════
 function openEditForm(id, pg) {
   editingId = id;
-  document.getElementById('pgName').value       = pg.name        || '';
-  document.getElementById('propertyType').value = pg.propertyType|| 'PG';
-  document.getElementById('pgPrice').value      = pg.price       || '';
-  document.getElementById('pgType').value       = pg.type        || 'Single';
-  document.getElementById('pgGender').value     = pg.gender      || 'Unisex';
-  document.getElementById('pgContact').value    = pg.contact     || '';
-  document.getElementById('pgLocation').value   = pg.location    || '';
-  document.getElementById('pgAmenities').value  = pg.amenities   || '';
-  document.getElementById('pgDesc').value       = pg.description || '';
+  document.getElementById('pgName').value = pg.name || '';
+  document.getElementById('propertyType').value = pg.propertyType || 'PG';
+  document.getElementById('pgPrice').value = pg.price || '';
+  document.getElementById('pgType').value = pg.type || 'Single';
+  document.getElementById('pgGender').value = pg.gender || 'Unisex';
+  document.getElementById('pgContact').value = pg.contact || '';
+  document.getElementById('pgLocation').value = pg.location || '';
+  document.getElementById('pgFoodIncluded').value = String(typeof pg.foodIncluded === 'boolean' ? pg.foodIncluded : hasFoodIncluded(pg));
+  document.getElementById('pgWifi').value = String(typeof pg.wifiAvailable === 'boolean' ? pg.wifiAvailable : hasWifi(pg));
+  document.getElementById('pgDistance').value = Number.isFinite(getDistanceValue(pg)) ? String(getDistanceValue(pg)) : '';
+  document.getElementById('pgAmenities').value = pg.amenities || '';
+  document.getElementById('pgDesc').value = pg.description || '';
 
-  document.getElementById('addCardTitle').textContent    = 'Edit Listing';
+  document.getElementById('addCardTitle').textContent = 'Edit Listing';
   document.getElementById('addCardSubtitle').textContent = 'Update your property details below.';
-  document.getElementById('submitBtn').textContent       = '💾 Save Changes';
+  document.getElementById('submitBtn').textContent = '💾 Save Changes';
   document.getElementById('cancelEditBtn').style.display = 'inline-flex';
 
   showSection('add');
@@ -896,15 +1086,17 @@ function cancelEdit() {
 }
 
 function resetForm() {
-  ['pgName','pgPrice','pgContact','pgLocation','pgAmenities','pgDesc'].forEach(id => {
+  ['pgName','pgPrice','pgContact','pgLocation','pgDistance','pgAmenities','pgDesc'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  document.getElementById('pgFoodIncluded').value = 'true';
+  document.getElementById('pgWifi').value = 'true';
   const pf = document.getElementById('photoFile');
   if (pf) pf.value = '';
-  document.getElementById('photoName').textContent       = '';
-  document.getElementById('addCardTitle').textContent    = 'List Your Property';
+  document.getElementById('photoName').textContent = '';
+  document.getElementById('addCardTitle').textContent = 'List Your Property';
   document.getElementById('addCardSubtitle').textContent = 'Fill in the details below to publish your PG listing.';
-  document.getElementById('submitBtn').textContent       = '🚀 Publish Listing';
+  document.getElementById('submitBtn').textContent = '🚀 Publish Listing';
   document.getElementById('cancelEditBtn').style.display = 'none';
 }
 
@@ -948,22 +1140,26 @@ async function submitPG() {
   if (!currentUser?.uid) { toast('Please sign in first', 'error');      return; }
 
   const propertyType = document.getElementById('propertyType').value;
-  const name         = document.getElementById('pgName').value.trim();
-  const priceRaw     = document.getElementById('pgPrice').value.trim();
-  const type         = document.getElementById('pgType').value;
-  const gender       = document.getElementById('pgGender').value;
-  const contact      = document.getElementById('pgContact').value.trim();
-  const location     = document.getElementById('pgLocation').value.trim();
-  const amenities    = document.getElementById('pgAmenities').value.trim();
-  const description  = document.getElementById('pgDesc').value.trim();
-  const photoFile    = document.getElementById('photoFile').files[0];
+  const name = document.getElementById('pgName').value.trim();
+  const priceRaw = document.getElementById('pgPrice').value.trim();
+  const type = document.getElementById('pgType').value;
+  const gender = document.getElementById('pgGender').value;
+  const contact = document.getElementById('pgContact').value.trim();
+  const location = document.getElementById('pgLocation').value.trim();
+  const foodIncluded = document.getElementById('pgFoodIncluded').value === 'true';
+  const wifiAvailable = document.getElementById('pgWifi').value === 'true';
+  const distanceRaw = document.getElementById('pgDistance').value.trim();
+  const amenities = document.getElementById('pgAmenities').value.trim();
+  const description = document.getElementById('pgDesc').value.trim();
+  const photoFile = document.getElementById('photoFile').files[0];
 
-  if (!name || !priceRaw || !contact || !location) {
+  if (!name || !priceRaw || !contact || !location || !distanceRaw) {
     toast('Please fill all required fields *', 'error'); return;
   }
   if (name.length < 3 || name.length > 80) {
     toast('Property name must be 3–80 characters', 'error'); return;
   }
+
   const price = parseInt(priceRaw, 10);
   if (isNaN(price) || price < MIN_RENT) {
     toast(`Minimum rent is ₹${MIN_RENT.toLocaleString()}`, 'error'); return;
@@ -977,14 +1173,19 @@ async function submitPG() {
   if (location.length < 5) {
     toast('Please enter a more specific location', 'error'); return;
   }
+
+  const distanceFromCollege = parseFloat(distanceRaw);
+  if (!Number.isFinite(distanceFromCollege) || distanceFromCollege < 0 || distanceFromCollege > 50) {
+    toast('Enter a valid distance from college', 'error'); return;
+  }
   if (photoFile && photoFile.size > MAX_IMAGE_BYTES) {
     toast('Image too large (max 3 MB)', 'error'); return;
   }
 
-  const btn    = document.getElementById('submitBtn');
+  const btn = document.getElementById('submitBtn');
   const isEdit = !!editingId;
   btn.textContent = isEdit ? 'Saving…' : 'Uploading…';
-  btn.disabled    = true;
+  btn.disabled = true;
 
   try {
     let imageUrl = '';
@@ -1003,8 +1204,18 @@ async function submitPG() {
     }
 
     const data = {
-      name, propertyType, price: String(price),
-      type, gender, contact, location, amenities, description,
+      name,
+      propertyType,
+      price: String(price),
+      type,
+      gender,
+      contact,
+      location,
+      foodIncluded,
+      wifiAvailable,
+      distanceFromCollege,
+      amenities,
+      description,
       imageUrl,
       updatedAt: Date.now()
     };
@@ -1016,7 +1227,7 @@ async function submitPG() {
     } else {
       await addDoc(collection(db, 'pgs'), {
         ...data,
-        ownerId:   currentUser.uid,
+        ownerId: currentUser.uid,
         ownerName: currentUser.name || 'Owner',
         available: true,
         createdAt: Date.now()
@@ -1026,13 +1237,12 @@ async function submitPG() {
 
     resetForm();
     showSection('browse');
-
   } catch (err) {
     toast('Error: ' + err.message, 'error');
     console.error(err);
   } finally {
     btn.textContent = isEdit ? '💾 Save Changes' : '🚀 Publish Listing';
-    btn.disabled    = false;
+    btn.disabled = false;
   }
 }
 
@@ -1062,6 +1272,16 @@ window.cancelEdit             = cancelEdit;
 window.switchToLogin          = switchToLogin;
 window.filterLocationDropdown = filterLocationDropdown;
 window.debouncedSearch        = debouncedSearch;
+window.clearAllFilters        = clearAllFilters;
+window.applyQuickFilter       = applyQuickFilter;
+window.toggleFilters          = toggleFilters;
+window.closeFilters           = closeFilters;
 
 // ── Kick off ─────────────────────────────────────────────
+window.addEventListener('resize', syncFilterPanelForViewport);
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeFilters(); });
 init();
+syncFilterPanelForViewport();
+
+
+
