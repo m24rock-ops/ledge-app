@@ -23,6 +23,9 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  margin:0;
+  padding: 0;
+  box-sizing:border-box;
 }
 
 h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
@@ -75,7 +78,8 @@ nav {
 .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
 /* ── LAYOUT ── */
-.container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+.container { width:100%;
+  max-width: 400px; margin: auto;}
 
 /* ── LOGIN SECTION ── */
 #loginSection {

@@ -2,14 +2,324 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LedGe – Find Your PG</title>
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-  <!-- Stylesheet -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="ledge.css"/>
+  <style>
+    :root {
+      --accent: #6c3fff;
+      --accent2: #ff6b35;
+      --surface: #f4f2ff;
+      --border: #e0d9ff;
+      --text: #1a1530;
+      --muted: #7b7490;
+      --bg: #faf9ff;
+      --success: #1a7c3e;
+      --danger: #c0392b;
+    }
+
+    /* ── Availability badges ──────────────────────── */
+    .avail-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 20px;
+      padding: 2px 10px;
+      margin-bottom: 6px;
+    }
+    .avail-badge.available   { background: #efffef; color: #1a7c3e; border: 1px solid #a8e6b8; }
+    .avail-badge.unavailable { background: #fff0f0; color: #c0392b; border: 1px solid #f5b7b1; }
+    .pg-card-unavailable { opacity: 0.65; }
+
+    /* ── Location filter ─────────────────────────── */
+    .location-filter-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+    .location-filter-wrap input  { font-size: 0.82rem; padding: 6px 10px; }
+    .location-filter-wrap select { font-size: 0.82rem; }
+
+    /* ── Max rent ───────────────────────────────── */
+    .rent-filter-wrap { display: flex; align-items: center; gap: 6px; min-width: 130px; }
+    .rent-filter-wrap label { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+    .rent-filter-wrap input { font-size: 0.82rem; padding: 6px 10px; width: 90px; }
+
+    /* ── OTP input ──────────────────────────────── */
+    #otpInput {
+      letter-spacing: 8px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* ══════════════════════════════════════════════
+       AUTH SECTION — complete redesign
+    ══════════════════════════════════════════════ */
+    #loginSection {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      padding: 24px 16px;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .auth-logo .brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+    .auth-logo .brand span { color: #a78bfa; }
+    .auth-logo .tagline {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    .auth-card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 32px 28px;
+      color: #fff;
+    }
+
+    .auth-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+    .auth-card .auth-subtitle {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.83rem;
+      margin-bottom: 24px;
+    }
+
+    /* Tab switcher: Phone / Email */
+    .auth-tabs {
+      display: flex;
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 22px;
+      gap: 4px;
+    }
+    .auth-tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.83rem;
+      font-weight: 600;
+      padding: 8px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .auth-tab-btn.active {
+      background: rgba(167,139,250,0.25);
+      color: #a78bfa;
+    }
+
+    /* Form groups */
+    .auth-group { margin-bottom: 16px; }
+    .auth-group label {
+      display: block;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .auth-group input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 0.92rem;
+      font-family: 'DM Sans', sans-serif;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .auth-group input:focus { border-color: #a78bfa; }
+    .auth-group input::placeholder { color: rgba(255,255,255,0.25); }
+
+    /* Password wrapper with toggle eye */
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 44px; }
+    .pw-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.35);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 4px;
+    }
+    .pw-toggle:hover { color: rgba(255,255,255,0.7); }
+
+    /* Strength bar */
+    .pw-strength-bar {
+      height: 3px;
+      border-radius: 3px;
+      margin-top: 6px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .pw-strength-fill {
+      height: 100%;
+      border-radius: 3px;
+      width: 0;
+      transition: width 0.3s, background 0.3s;
+    }
+    .pw-strength-label {
+      font-size: 0.7rem;
+      margin-top: 4px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* Hint / link */
+    .auth-hint {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.35);
+      margin-top: 4px;
+    }
+    .auth-link {
+      color: #a78bfa;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      font-size: inherit;
+      font-family: inherit;
+      padding: 0;
+    }
+    .auth-link:hover { color: #c4b5fd; }
+
+    /* Primary button */
+    .auth-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 13px;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .auth-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .auth-btn-ghost {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      color: rgba(255,255,255,0.6);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      padding: 11px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .auth-btn-ghost:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+
+    /* Divider */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0;
+      color: rgba(255,255,255,0.2);
+      font-size: 0.75rem;
+    }
+    .auth-divider::before,.auth-divider::after {
+      content:''; flex:1; height:1px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Guest panel */
+    .guest-panel {
+      margin-top: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px dashed rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .guest-panel h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      margin: 0 0 8px;
+      color: rgba(255,255,255,0.7);
+    }
+    .guest-perms {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.8;
+      margin-bottom: 14px;
+    }
+
+    /* OTP step */
+    #authStepOTP { display: none; }
+    #authStepOTP #otpInput {
+      letter-spacing: 12px;
+      font-size: 1.6rem;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    /* Set-password step */
+    #authStepSetPw { display: none; }
+
+    /* Reset-password step */
+    #authStepReset { display: none; }
+
+    /* Active step shows */
+    .auth-step.show { display: block !important; }
+
+    /* Timer */
+    .otp-timer {
+      text-align: center;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.35);
+      margin-top: 10px;
+    }
+    .otp-resend-row {
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    /* Success check */
+    .auth-success-icon {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+  </style>
 </head>
 <body>
 
@@ -24,10 +334,10 @@
     </div>
   </div>
 
-  <!-- Toast Notification -->
+  <!-- Toast -->
   <div id="toast"></div>
 
-  <!-- DELETE CONFIRM MODAL -->
+  <!-- DELETE MODAL -->
   <div class="modal-overlay" id="deleteModal">
     <div class="modal">
       <h3>Delete Listing?</h3>
@@ -36,6 +346,14 @@
         <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
         <button class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
       </div>
+    </div>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-overlay" id="detailModal" onclick="closeDetailModal()">
+    <div class="modal" style="max-width:500px;max-height:90vh;overflow-y:auto;position:relative;" onclick="event.stopPropagation()">
+      <button onclick="closeDetailModal()" style="position:absolute;top:14px;right:16px;background:transparent;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);line-height:1;">✕</button>
+      <div id="detailModalBody"></div>
     </div>
   </div>
 
@@ -48,53 +366,161 @@
     </div>
   </nav>
 
-  <!-- LOGIN SECTION -->
+  <!-- ═══════════════════════════════════════════
+       AUTH SECTION
+  ════════════════════════════════════════════ -->
   <section id="loginSection">
-    <div class="login-wrapper">
+    <div class="auth-container">
 
-      <div class="login-hero">
-        <h1>Find Your<br/><span>Nest</span></h1>
-        <p>Ledge.com</p>
+      <div class="auth-logo">
+        <div class="brand">Led<span>Ge</span></div>
+        <div class="tagline">Find your perfect PG, effortlessly.</div>
       </div>
 
-      <div class="login-cards">
+      <div class="auth-card">
 
-        <!-- Card 1: Registered User -->
-        <div class="login-card card-user">
-          <h3> Sign In / Register</h3>
-          <p>Save your listings and manage your properties as an owner.</p>
-          <div class="form-group">
+        <!-- ── STEP 1: Main login form ── -->
+        <div id="authStep1" class="auth-step show">
+          <h3>Welcome back 👋</h3>
+          <p class="auth-subtitle">Sign in or create your account to continue.</p>
+
+          <!-- Phone / Email tabs -->
+          <div class="auth-tabs">
+            <button class="auth-tab-btn active" id="tabPhone" onclick="switchAuthMode('phone')">📱 Phone OTP</button>
+            <button class="auth-tab-btn"         id="tabEmail" onclick="switchAuthMode('email')">✉️ Email</button>
+          </div>
+
+          <!-- Name -->
+          <div class="auth-group">
             <label>Your Name</label>
-            <input type="text" id="userName" placeholder="e.g. Arjun Kumar"/>
+            <input type="text" id="userName" placeholder="e.g. Arjun Kumar" autocomplete="name"/>
           </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" id="userPhone" placeholder="10-digit mobile number" maxlength="10"/>
+
+          <!-- Phone mode -->
+          <div id="phoneFields">
+            <div class="auth-group">
+              <label>Phone Number</label>
+              <input type="tel" id="userPhone" placeholder="10-digit mobile number"
+                     inputmode="numeric" maxlength="10"
+                     oninput="this.value=this.value.replace(/\D/g,'')"
+                     onkeydown="if(event.key==='Enter') handleContinue()"/>
+            </div>
           </div>
-          <button class="btn btn-primary btn-full" onclick="login()">Continue →</button>
+
+          <!-- Email mode -->
+          <div id="emailFields" style="display:none;">
+            <div class="auth-group">
+              <label>Email Address</label>
+              <input type="email" id="userEmail" placeholder="you@example.com"
+                     autocomplete="email"
+                     onkeydown="if(event.key==='Enter') handleContinue()"/>
+            </div>
+            <div class="auth-group">
+              <label>Password</label>
+              <div class="pw-wrap">
+                <input type="password" id="userPassword" placeholder="Enter password"
+                       autocomplete="current-password"
+                       oninput="checkPasswordStrength(this.value, 'loginStrengthFill','loginStrengthLabel')"
+                       onkeydown="if(event.key==='Enter') handleContinue()"/>
+                <button type="button" class="pw-toggle" onclick="togglePwVisibility('userPassword',this)">👁</button>
+              </div>
+              <div class="pw-strength-bar"><div class="pw-strength-fill" id="loginStrengthFill"></div></div>
+              <div class="pw-strength-label" id="loginStrengthLabel"></div>
+            </div>
+            <div style="text-align:right;margin-top:-8px;margin-bottom:12px;">
+              <button class="auth-link" onclick="showResetStep()">Forgot password?</button>
+            </div>
+          </div>
+
+          <div id="recaptcha-container"></div>
+          <button class="auth-btn" id="continueBtn" onclick="handleContinue()">Continue →</button>
+
+          <div class="auth-hint" style="margin-top:12px;text-align:center;">
+            New to LedGe? We'll create your account automatically.
+          </div>
         </div>
 
-        <!-- Card 2: Guest -->
-        <div class="login-card card-guest">
-          <h3> Browse as Guest</h3>
-          <p>Explore PG listings without creating an account. You won't be able to add or delete listings.</p>
-          <div style="background:var(--surface);border-radius:8px;padding:16px;margin-bottom:20px;">
-            <p style="color:var(--muted);font-size:0.82rem;margin-bottom:0;">
-              ✔ View all listings<br/>
-              ✔ Contact owners via WhatsApp<br/>
-              ✖ Cannot add listings<br/>
-              ✖ Cannot delete your posts
-            </p>
+        <!-- ── STEP 2: OTP verify ── -->
+        <div id="authStepOTP" class="auth-step">
+          <h3>Verify OTP 🔐</h3>
+          <p class="auth-subtitle" id="otpSentMsg">OTP sent to <strong id="otpPhone"></strong></p>
+          <div class="auth-group">
+            <label>6-Digit OTP</label>
+            <input type="text" id="otpInput" placeholder="——————" maxlength="6"
+                   inputmode="numeric" autocomplete="one-time-code"
+                   oninput="this.value=this.value.replace(/\D/g,'')"
+                   onkeydown="if(event.key==='Enter') verifyOTP()"/>
           </div>
-          <button class="btn btn-secondary btn-full" onclick="continueAsGuest()">Browse Without Login</button>
+          <button class="auth-btn" onclick="verifyOTP()">Verify & Continue →</button>
+          <button class="auth-btn-ghost" onclick="backToStep1()">← Change Number</button>
+          <div class="otp-timer" id="otpTimer"></div>
+          <div class="otp-resend-row" id="resendRow" style="display:none;">
+            <button class="auth-link" onclick="resendOTP()">↺ Resend OTP</button>
+          </div>
         </div>
 
+        <!-- ── STEP 3: Set / Create Password (after first OTP login) ── -->
+        <div id="authStepSetPw" class="auth-step">
+          <div class="auth-success-icon">🔑</div>
+          <h3>Secure your account</h3>
+          <p class="auth-subtitle">Create a password so you can log in with email next time — no OTP needed!</p>
+
+          <div class="auth-group">
+            <label>New Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="setPwInput" placeholder="At least 8 characters"
+                     oninput="checkPasswordStrength(this.value,'setPwStrengthFill','setPwStrengthLabel')"
+                     onkeydown="if(event.key==='Enter') saveNewPassword()"/>
+              <button type="button" class="pw-toggle" onclick="togglePwVisibility('setPwInput',this)">👁</button>
+            </div>
+            <div class="pw-strength-bar"><div class="pw-strength-fill" id="setPwStrengthFill"></div></div>
+            <div class="pw-strength-label" id="setPwStrengthLabel"></div>
+          </div>
+          <div class="auth-group">
+            <label>Confirm Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="setPwConfirm" placeholder="Repeat password"
+                     onkeydown="if(event.key==='Enter') saveNewPassword()"/>
+              <button type="button" class="pw-toggle" onclick="togglePwVisibility('setPwConfirm',this)">👁</button>
+            </div>
+          </div>
+          <button class="auth-btn" onclick="saveNewPassword()">🔒 Save Password</button>
+          <button class="auth-btn-ghost" onclick="skipSetPassword()">Skip for now</button>
+        </div>
+
+        <!-- ── STEP 4: Password Reset ── -->
+        <div id="authStepReset" class="auth-step">
+          <h3>Reset Password 📧</h3>
+          <p class="auth-subtitle">Enter your email and we'll send a reset link.</p>
+          <div class="auth-group">
+            <label>Email Address</label>
+            <input type="email" id="resetEmail" placeholder="you@example.com"
+                   onkeydown="if(event.key==='Enter') sendPasswordReset()"/>
+          </div>
+          <button class="auth-btn" onclick="sendPasswordReset()">Send Reset Link</button>
+          <button class="auth-btn-ghost" onclick="backToStep1()">← Back to Login</button>
+        </div>
+
+      </div><!-- /auth-card -->
+
+      <!-- Guest panel -->
+      <div class="guest-panel">
+        <h4>Browse as Guest</h4>
+        <div class="guest-perms">
+          ✔ View all listings &nbsp; ✔ Contact owners via WhatsApp<br/>
+          ✔ View full listing details<br/>
+          ✖ Cannot add or manage listings
+        </div>
+        <button class="auth-btn-ghost" onclick="continueAsGuest()" style="margin-top:0;">Browse Without Login</button>
       </div>
+
     </div>
   </section>
 
-  <!-- MAIN APP -->
-  <div id="mainApp">
+  <!-- ═══════════════════════════════════════════
+       MAIN APP
+  ════════════════════════════════════════════ -->
+  <div id="mainApp" style="display:none;">
     <div class="container">
 
       <!-- Tabs -->
@@ -103,9 +529,15 @@
         <button class="tab-btn"        id="tab-add"    onclick="showSection('add')">＋ List Your PG</button>
       </div>
 
-      <!-- Browse Section -->
+      <!-- ── BROWSE ─────────────────────────── -->
       <div id="browseSection">
-        <div class="filter-bar">
+        <div class="form-group" style="margin-bottom:12px;">
+          <input type="text" id="searchInput"
+            placeholder="🔍  Search by area, name, amenities..."
+            oninput="debouncedSearch()" style="font-size:0.92rem;"/>
+        </div>
+
+        <div class="filter-bar" style="flex-wrap:wrap;gap:10px;">
           <select id="filterType" onchange="loadPGs()">
             <option value="all">All Types</option>
             <option value="PG">PG</option>
@@ -114,22 +546,40 @@
             <option value="Room">Single Room</option>
           </select>
           <select id="filterGender" onchange="loadPGs()">
-            <option value="all">All</option>
+            <option value="all">All Genders</option>
             <option value="Boys">Boys</option>
             <option value="Girls">Girls</option>
             <option value="Unisex">Unisex</option>
           </select>
+          <select id="filterAvail" onchange="loadPGs()">
+            <option value="all">All Availability</option>
+            <option value="available">🟢 Available</option>
+            <option value="unavailable">🔴 Filled</option>
+          </select>
+          <div class="location-filter-wrap">
+            <input type="text" id="locationSearch" placeholder="📍 Type area..."
+                   oninput="filterLocationDropdown()"/>
+            <select id="filterLocation" onchange="loadPGs()">
+              <option value="all">All Locations</option>
+            </select>
+          </div>
+          <div class="rent-filter-wrap">
+            <label for="filterMaxRent">Max ₹</label>
+            <input type="number" id="filterMaxRent" placeholder="e.g. 15000"
+                   min="0" step="500" oninput="debouncedSearch()"/>
+          </div>
           <button class="btn btn-secondary btn-sm" onclick="loadPGs()">↻ Refresh</button>
         </div>
+
         <div class="results-meta" id="resultsMeta"></div>
         <div id="pgList"></div>
       </div>
 
-      <!-- Add Section -->
+      <!-- ── ADD / EDIT ──────────────────────── -->
       <div id="addSection" style="display:none;">
         <div class="add-card">
-          <h3>List Your Property</h3>
-          <p>Fill in the details below to publish your PG listing.</p>
+          <h3 id="addCardTitle">List Your Property</h3>
+          <p id="addCardSubtitle">Fill in the details below to publish your PG listing.</p>
 
           <div id="guestNotice" class="guest-notice" style="display:none;">
             ⚠️ You are browsing as a guest.
@@ -141,7 +591,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Property Name *</label>
-                <input type="text" id="pgName" placeholder="e.g. Sunrise PG"/>
+                <input type="text" id="pgName" placeholder="e.g. Sunrise PG" maxlength="80"/>
               </div>
               <div class="form-group">
                 <label>Property Type *</label>
@@ -153,11 +603,10 @@
                 </select>
               </div>
             </div>
-
             <div class="form-row">
               <div class="form-group">
                 <label>Monthly Rent (₹) *</label>
-                <input type="number" id="pgPrice" placeholder="e.g. 6000"/>
+                <input type="number" id="pgPrice" step="500" min="500" max="200000" placeholder="e.g. 6000"/>
               </div>
               <div class="form-group">
                 <label>Room Type *</label>
@@ -169,7 +618,6 @@
                 </select>
               </div>
             </div>
-
             <div class="form-row">
               <div class="form-group">
                 <label>Gender *</label>
@@ -184,32 +632,28 @@
                 <input type="tel" id="pgContact" placeholder="WhatsApp number" maxlength="10"/>
               </div>
             </div>
-
             <div class="form-group">
               <label>Location / Address *</label>
               <input type="text" id="pgLocation" placeholder="e.g. Koramangala, Bangalore"/>
             </div>
-
             <div class="form-group">
               <label>Amenities</label>
               <input type="text" id="pgAmenities" placeholder="WiFi, AC, Food, Laundry..."/>
             </div>
-
             <div class="form-group">
               <label>Description</label>
-              <textarea id="pgDesc" placeholder="Brief description of the property..."></textarea>
+              <textarea id="pgDesc" placeholder="Brief description of the property..." maxlength="500"></textarea>
             </div>
-
             <div class="form-group">
-              <label>Photo</label>
+              <label>Photo <span style="color:var(--muted);font-size:0.78rem;">(Max 3 MB)</span></label>
               <label class="file-label" for="photoFile">📷 Choose photo (JPG/PNG)</label>
-              <input type="file" id="photoFile" accept="image/*" onchange="handleFileSelect(this)"/>
+              <input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp" onchange="handleFileSelect(this)"/>
               <div id="photoName"></div>
             </div>
-
-            <button class="btn btn-primary btn-full" id="submitBtn" onclick="submitPG()">
-              Publish Listing
-            </button>
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn-secondary btn-full" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;">✕ Cancel</button>
+              <button class="btn btn-primary btn-full" id="submitBtn" onclick="submitPG()">🚀 Publish Listing</button>
+            </div>
           </div>
         </div>
       </div>
@@ -218,10 +662,6 @@
     </div>
   </div>
 
-  <!-- JavaScript (ES Module) -->
   <script type="module" src="ledge.js"></script>
-
 </body>
 </html>
-```
-
